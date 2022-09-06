@@ -111,7 +111,7 @@ void Grid2D::FinishUpdate() {
     DCHECK_GE(correspondence_cost_cells_[update_indices_.back()],
               kUpdateMarker);
     // 更新的时候加上了kUpdateMarker, 在这里减去
-    correspondence_cost_cells_[update_indices_.back()] -= kUpdateMarker;
+    correspondence_cost_cells_[update_indices_.back()] -= kUpdateMarker;  //jc:对于同一个栅格有可能会被多次更新，所以加了kUpdateMarker参数
     update_indices_.pop_back();
   }
 }
@@ -142,7 +142,7 @@ void Grid2D::GrowLimits(const Eigen::Vector2f& point) {
 
 // 根据坐标决定是否对地图进行扩大
 void Grid2D::GrowLimits(const Eigen::Vector2f& point,
-                        const std::vector<std::vector<uint16>*>& grids,
+                        const std::vector<std::vector<uint16>*>& grids,  //jc: 指向vector<uint16> 类型的指针 ，所以下面可以直接赋值
                         const std::vector<uint16>& grids_unknown_cell_values) {
   CHECK(update_indices_.empty());
   // 判断该点是否在地图坐标系内
@@ -158,7 +158,7 @@ void Grid2D::GrowLimits(const Eigen::Vector2f& point,
                    2 * limits_.cell_limits().num_y_cells));
     const int stride = new_limits.cell_limits().num_x_cells;
     // 老坐标系的原点在新坐标系下的一维像素坐标
-    const int offset = x_offset + stride * y_offset;
+    const int offset = x_offset + stride * y_offset;   //jc:因为地图扩大了2倍，所以原来的（0，0）点需要加上这个数offset。因为地图存储是一维的
     const int new_size = new_limits.cell_limits().num_x_cells *
                          new_limits.cell_limits().num_y_cells;
 
@@ -174,13 +174,13 @@ void Grid2D::GrowLimits(const Eigen::Vector2f& point,
         }
       }
       // 将新地图替换老地图, 拷贝
-      *grids[grid_index] = new_cells;
+      *grids[grid_index] = new_cells; //jc: 指向vector<uint16> 类型的指针 ，所以可以直接赋值
     } // end for
     // 更新地图尺寸
     limits_ = new_limits;
     if (!known_cells_box_.isEmpty()) {
       // 将known_cells_box_的x与y进行平移到老地图的范围上
-      known_cells_box_.translate(Eigen::Vector2i(x_offset, y_offset));
+      known_cells_box_.translate(Eigen::Vector2i(x_offset, y_offset));  //jc:将对应原来的像素坐标进行平移
     }
   }
 }
