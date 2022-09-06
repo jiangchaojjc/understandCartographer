@@ -21,7 +21,7 @@
 #include "cartographer_ros/ros_log_sink.h"
 #include "gflags/gflags.h"
 #include "tf2_ros/transform_listener.h"
-// jc:test git 测试目的yayayay
+// jc:test git 测试目的yayayayhome
 /**
  * note: gflags是一套命令行参数解析工具
  * DEFINE_bool在gflags.h中定义
