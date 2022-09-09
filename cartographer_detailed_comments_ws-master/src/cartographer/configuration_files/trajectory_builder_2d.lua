@@ -41,9 +41,9 @@ TRAJECTORY_BUILDER_2D = {
   -- 计算复杂度高 , 但是很鲁棒 , 在odom或者imu不准时依然能达到很好的效果
   use_online_correlative_scan_matching = false,
   real_time_correlative_scan_matcher = {
-    linear_search_window = 0.1,             -- 线性搜索窗口的大小
-    angular_search_window = math.rad(20.),  -- 角度搜索窗口的大小
-    translation_delta_cost_weight = 1e-1,   -- 用于计算各部分score的权重
+    linear_search_window = 0.1,             -- 线性搜索窗口的大小    //jc:这一块如果值设大一点就可以进行重定位
+    angular_search_window = math.rad(20.),  -- 角度搜索窗口的大小   //jc:这一块如果值设大一点就可以进行重定位
+    translation_delta_cost_weight = 1e-1,   -- 用于计算各部分score的权重 
     rotation_delta_cost_weight = 1e-1,
   },
 

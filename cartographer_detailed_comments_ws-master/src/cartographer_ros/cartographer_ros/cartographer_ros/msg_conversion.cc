@@ -504,7 +504,7 @@ std::unique_ptr<nav_msgs::OccupancyGrid> CreateOccupancyGridMsg(
       const int value =
           observed == 0
               ? -1
-              : ::cartographer::common::RoundToInt((1. - color / 255.) * 100.);
+              : ::cartographer::common::RoundToInt((1. - color / 255.) * 100.);  //jc:将0~255之间的数转为0-100之间的数
 
       /* note: 生成ROS兼容的栅格地图
       * 像素值65-100的设置占用值为100,表示占用,代表障碍物

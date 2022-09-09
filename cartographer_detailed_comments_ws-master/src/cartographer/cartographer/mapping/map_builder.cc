@@ -278,7 +278,7 @@ std::string MapBuilder::SubmapToProto(
   }
 
   // 将压缩后的地图数据放入response
-  submap_data.submap->ToResponseProto(submap_data.pose, response);
+  submap_data.submap->ToResponseProto(submap_data.pose, response);   //jc:调用submap_2d.cc下145行
   return "";
 }
 

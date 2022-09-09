@@ -236,7 +236,7 @@ SubmapTexture::Pixels UnpackTextureData(const std::string& compressed_cells,
   for (int i = 0; i < height; ++i) {
     for (int j = 0; j < width; ++j) {
       // 地图数据存了intensity与alpha两个值
-      pixels.intensity.push_back(cells[(i * width + j) * 2]);
+      pixels.intensity.push_back(cells[(i * width + j) * 2]);//jc:intensity为栅格地图对value的计算
       pixels.alpha.push_back(cells[(i * width + j) * 2 + 1]);
     }
   }

@@ -70,20 +70,21 @@ void ProbabilityGrid::SetProbability(const Eigen::Array2i& cell_index,
 // 如果这是对指定单元格第一次调用 ApplyOdds(),则其值将设置为与 'odds' 对应的概率
 
 // 使用查找表对指定栅格进行栅格值的更新
-bool ProbabilityGrid::ApplyLookupTable(const Eigen::Array2i& cell_index,
+bool ProbabilityGrid::ApplyLookupTable(const Eigen::Array2i& cell_index,  //jc:主要通过这个函数对栅格值进行更新
+    return false;
                                        const std::vector<uint16>& table) {
   DCHECK_EQ(table.size(), kUpdateMarker);
   const int flat_index = ToFlatIndex(cell_index);
   // 获取对应栅格的指针
   uint16* cell = &(*mutable_correspondence_cost_cells())[flat_index];
   // 对处于更新状态的栅格, 不再进行更新了
-  if (*cell >= kUpdateMarker) {
+  if (*cell >= kUpdateMarker) { //jc:同一个栅格在一针雷达数据不做多次更新，kUpdateMarker值在probabilit_values.cc 116行被加上
     return false;
   }
   // 标记这个索引的栅格已经被更新过
   mutable_update_indices()->push_back(flat_index);
   // 更新栅格值
-  *cell = table[*cell];
+  *cell = table[*cell];  //jc:table[*cell] =*cell * odds(0.55) 再转成value;只是table先将所有可能的值都计算好并存储下来了
   DCHECK_GE(*cell, kUpdateMarker);
   // 更新bounding_box
   mutable_known_cells_box()->extend(cell_index.matrix());
@@ -126,7 +127,7 @@ std::unique_ptr<Grid2D> ProbabilityGrid::ComputeCroppedGrid() const {
   // 给新栅格地图赋值
   for (const Eigen::Array2i& xy_index : XYIndexRangeIterator(cell_limits)) {
     if (!IsKnown(xy_index + offset)) continue;
-    cropped_grid->SetProbability(xy_index, GetProbability(xy_index + offset));
+    cropped_grid->SetProbability(xy_index, GetProbability(xy_index + offset));  //jc:SetProbability只对新的地图进行更新
   }
 
   // 返回新地图的指针
@@ -134,7 +135,7 @@ std::unique_ptr<Grid2D> ProbabilityGrid::ComputeCroppedGrid() const {
 }
 
 // 获取压缩后的地图栅格数据
-bool ProbabilityGrid::DrawToSubmapTexture(
+bool ProbabilityGrid::DrawToSubmapTexture(      
     proto::SubmapQuery::Response::SubmapTexture* const texture,
     transform::Rigid3d local_pose) const {
   Eigen::Array2i offset;
@@ -163,10 +164,10 @@ bool ProbabilityGrid::DrawToSubmapTexture(
     
     // delta处于[-127, 127]
     const int delta =
-        128 - ProbabilityToLogOddsInteger(GetProbability(xy_index + offset));
+        128 - ProbabilityToLogOddsInteger(GetProbability(xy_index + offset));   //jc:这个的返回值在-~255
     const uint8 alpha = delta > 0 ? 0 : -delta;
     const uint8 value = delta > 0 ? delta : 0;
-    // 存数据时存了2个值, 一个是栅格值value, 另一个是alpha透明度
+    // 存数据时存了2个值, 一个是栅格值value（栅格的灰度）, 另一个是alpha透明度
     cells.push_back(value);
     cells.push_back((value || alpha) ? alpha : 1);
   }

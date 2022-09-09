@@ -97,7 +97,7 @@ std::vector<uint16> ComputeLookupTableToApplyOdds(const float odds) {
 }
 
 // 将栅格是未知状态与odds状态下, 将更新时的所有可能结果预先计算出来
-std::vector<uint16> ComputeLookupTableToApplyCorrespondenceCostOdds(
+std::vector<uint16> ComputeLookupTableToApplyCorrespondenceCostOdds(  
     float odds) {
   std::vector<uint16> result;
   result.reserve(kValueCount); // 32768
@@ -111,9 +111,9 @@ std::vector<uint16> ComputeLookupTableToApplyCorrespondenceCostOdds(
     result.push_back(
         CorrespondenceCostToValue(
             ProbabilityToCorrespondenceCost(ProbabilityFromOdds(
-                odds * Odds(CorrespondenceCostToProbability(
+                odds * Odds(CorrespondenceCostToProbability(    //jc:用当前的odds乘以现在的odds来对栅格进行更新
                            (*kValueToCorrespondenceCost)[cell]))))) +
-        kUpdateMarker);
+        kUpdateMarker);  //jc:kUpdateMarker表示该栅格已经更新过了
   }
   return result;
 }

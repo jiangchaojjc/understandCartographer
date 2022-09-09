@@ -67,7 +67,7 @@ float ComputeCandidateScore(const ProbabilityGrid& probability_grid,
   for (const Eigen::Array2i& xy_index : discrete_scan) {
     // 对每个点都加上像素坐标的offset, 相当于对点云进行平移
     const Eigen::Array2i proposed_xy_index(xy_index.x() + x_index_offset,
-                                           xy_index.y() + y_index_offset);
+                                           xy_index.y() + y_index_offset);  //jc:在旋转下栅格的情况下加上平移的量
     // 获取占用的概率
     const float probability =
         probability_grid.GetProbability(proposed_xy_index);
@@ -91,7 +91,7 @@ std::vector<Candidate2D>
 RealTimeCorrelativeScanMatcher2D::GenerateExhaustiveSearchCandidates(
     const SearchParameters& search_parameters) const {
   int num_candidates = 0;
-  // 计算候选解的个数
+  // 计算候选解的个数 //jc:平移数*旋转数 = 总共多少组解
   for (int scan_index = 0; scan_index != search_parameters.num_scans;
        ++scan_index) {
     const int num_linear_x_candidates =
@@ -100,14 +100,14 @@ RealTimeCorrelativeScanMatcher2D::GenerateExhaustiveSearchCandidates(
     const int num_linear_y_candidates =
         (search_parameters.linear_bounds[scan_index].max_y -
          search_parameters.linear_bounds[scan_index].min_y + 1);
-    num_candidates += num_linear_x_candidates * num_linear_y_candidates;
+    num_candidates += num_linear_x_candidates * num_linear_y_candidates;  //jc:这里有多少个角度就有多少次累加
   }
 
   std::vector<Candidate2D> candidates;
   candidates.reserve(num_candidates);
 
   // 生成候选解, 候选解是由像素坐标的偏差组成的
-  for (int scan_index = 0; scan_index != search_parameters.num_scans;
+  for (int scan_index = 0; scan_index != search_parameters.num_scans;  //jc:这里计算每个角度下并且每个x下并且每个y下的候选的偏移量
        ++scan_index) {
     for (int x_index_offset = search_parameters.linear_bounds[scan_index].min_x;
          x_index_offset <= search_parameters.linear_bounds[scan_index].max_x;
@@ -148,16 +148,16 @@ double RealTimeCorrelativeScanMatcher2D::Match(
           initial_rotation.cast<float>().angle(), Eigen::Vector3f::UnitZ())));
 
   // 根据配置参数初始化 SearchParameters
-  const SearchParameters search_parameters(
-      options_.linear_search_window(), options_.angular_search_window(),
-      rotated_point_cloud, grid.limits().resolution());
+  const SearchParameters search_parameters(  //jc:correlative_scan_matcher_2d.h 35行
+      options_.linear_search_window(), options_.angular_search_window(), //jc:这里的参数是trejectory_grid_2d.lua中的参数
+      rotated_point_cloud, grid.limits().resolution());   //
 
   // Step: 2 生成按照不同角度旋转后的点云集合
-  const std::vector<sensor::PointCloud> rotated_scans =
+  const std::vector<sensor::PointCloud> rotated_scans =    //jc:PointCloud里保存了一帧点云的集合
       GenerateRotatedScans(rotated_point_cloud, search_parameters);
   
   // Step: 3 将旋转后的点云集合按照预测出的平移量进行平移, 获取平移后的点在地图中的索引
-  const std::vector<DiscreteScan2D> discrete_scans = DiscretizeScans(
+  const std::vector<DiscreteScan2D> discrete_scans = DiscretizeScans(   //jc:获取所有可能的旋转平移之后的点的索引
       grid.limits(), rotated_scans,
       Eigen::Translation2f(initial_pose_estimate.translation().x(),
                            initial_pose_estimate.translation().y()));
@@ -189,9 +189,9 @@ void RealTimeCorrelativeScanMatcher2D::ScoreCandidates(
   for (Candidate2D& candidate : *candidates) {
     switch (grid.GetGridType()) {
       case GridType::PROBABILITY_GRID:
-        candidate.score = ComputeCandidateScore(
+        candidate.score = ComputeCandidateScore(  
             static_cast<const ProbabilityGrid&>(grid),
-            discrete_scans[candidate.scan_index], candidate.x_index_offset,
+            discrete_scans[candidate.scan_index], candidate.x_index_offset,  //jc:这里取的discrete_scans[candidate.scan_index]只是旋转下栅格索引
             candidate.y_index_offset);
         break;
       case GridType::TSDF:
@@ -203,8 +203,8 @@ void RealTimeCorrelativeScanMatcher2D::ScoreCandidates(
     }
     // 对得分进行加权
     candidate.score *=
-        std::exp(-common::Pow2(std::hypot(candidate.x, candidate.y) *
-                                   options_.translation_delta_cost_weight() +
+        std::exp(-common::Pow2(std::hypot(candidate.x, candidate.y) *   
+                                   options_.translation_delta_cost_weight() +   //jc:这里相对距离越大，得分越小。所以比较相信初始的位姿的，如果初始位姿不准，可以将这一部分去掉
                                std::abs(candidate.orientation) *
                                    options_.rotation_delta_cost_weight()));
   }

@@ -161,8 +161,8 @@ void Submap2D::InsertRangeData(
   CHECK(grid_);
   CHECK(!insertion_finished());
   // 将雷达数据写到栅格地图中
-  range_data_inserter->Insert(range_data, grid_.get());
-  // 插入到地图中的雷达数据的个数加1
+  range_data_inserter->Insert(range_data, grid_.get());   //jc:这个指针在activesubmap2s构造的时候 181行 根据CreateRangeDataInserter创建PROBABILITY_GRID_INSERTER_2D
+  // 插入到地图中的雷达数据的个数加1                         //jc:所以range_data_inserter指的是PROBABILITY_GRID_INSERTER_2D
   set_num_range_data(num_range_data() + 1);
 }
 

@@ -99,11 +99,11 @@ std::unique_ptr<transform::Rigid2d> LocalTrajectoryBuilder2D::ScanMatch(
   transform::Rigid2d initial_ceres_pose = pose_prediction;
 
   // 根据参数决定是否 使用correlative_scan_matching对先验位姿进行校准
-  if (options_.use_online_correlative_scan_matching()) {
-    const double score = real_time_correlative_scan_matcher_.Match(
+  if (options_.use_online_correlative_scan_matching()) {  //jc:trajectory_builder_2d.lua 42行的use_online_correlative_scan_matching ，这一块给初始位姿做了矫正（暴力搜索）
+    const double score = real_time_correlative_scan_matcher_.Match(  //jc:扫描匹配开始
         pose_prediction, filtered_gravity_aligned_point_cloud,
         *matching_submap->grid(), &initial_ceres_pose);
-    kRealTimeCorrelativeScanMatcherScoreMetric->Observe(score);
+    kRealTimeCorrelativeScanMatcherScoreMetric->Observe(score); //jc:initial_ceres_pose矫正之后的位姿
   }
 
   auto pose_observation = absl::make_unique<transform::Rigid2d>();
@@ -305,10 +305,10 @@ LocalTrajectoryBuilder2D::AddAccumulatedRangeData(   //logic:本类 140行 AddRa
   // Computes a gravity aligned pose prediction.
   // 进行位姿的预测, 先验位姿
   const transform::Rigid3d non_gravity_aligned_pose_prediction =
-      extrapolator_->ExtrapolatePose(time);
+      extrapolator_->ExtrapolatePose(time);  //jc:位子推测其估计time时刻的位姿
   // 将三维位姿先旋转到姿态为0, 再取xy坐标将三维位姿转成二维位姿
   const transform::Rigid2d pose_prediction = transform::Project2D(
-      non_gravity_aligned_pose_prediction * gravity_alignment.inverse());  //jc:初始时刻，如果imu有xy方向的线加速度分量，初始时刻也不是0，0，0
+      non_gravity_aligned_pose_prediction * gravity_alignment.inverse());  //jc:重力矫正，重力方向z轴一致，初始时刻，如果imu有xy方向的线加速度分量，初始时刻也不是0，0，0
 
   // Step: 7 对 returns点云 进行自适应体素滤波，返回的点云的数据类型是PointCloud
   const sensor::PointCloud& filtered_gravity_aligned_point_cloud =
@@ -330,7 +330,7 @@ LocalTrajectoryBuilder2D::AddAccumulatedRangeData(   //logic:本类 140行 AddRa
 
   // 将二维坐标旋转回之前的姿态
   const transform::Rigid3d pose_estimate =
-      transform::Embed3D(*pose_estimate_2d) * gravity_alignment;
+      transform::Embed3D(*pose_estimate_2d) * gravity_alignment;    //jc:pose_estimate_2d扫描匹配之后的位置，将pose_estimate_2d*gravity_alignment得到扫描匹配之后的姿态
   // 校准位姿估计器
   extrapolator_->AddPose(time, pose_estimate);
 

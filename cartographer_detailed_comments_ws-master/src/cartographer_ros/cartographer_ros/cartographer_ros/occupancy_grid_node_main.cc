@@ -107,7 +107,7 @@ Node::Node(const double resolution, const double publish_period_sec)
                                        &Node::DrawAndPublish, this)) {}
 
 // 订阅SubmapList话题的回调函数
-void Node::HandleSubmapList(
+void Node::HandleSubmapList(    //jc:开始获取地图
     const cartographer_ros_msgs::SubmapList::ConstPtr& msg) {
   absl::MutexLock locker(&mutex_);
 
@@ -149,7 +149,7 @@ void Node::HandleSubmapList(
 
     // Step: 1 获取格式为io::SubmapTextures的地图栅格数据
     auto fetched_textures =
-        ::cartographer_ros::FetchSubmapTextures(id, &client_);
+        ::cartographer_ros::FetchSubmapTextures(id, &client_);  //jc:获取栅格地图
 
     if (fetched_textures == nullptr) {
       continue;

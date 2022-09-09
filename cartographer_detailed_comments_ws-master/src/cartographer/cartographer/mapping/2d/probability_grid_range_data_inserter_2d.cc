@@ -39,7 +39,7 @@ void GrowAsNeeded(const sensor::RangeData& range_data,
   Eigen::AlignedBox2f bounding_box(range_data.origin.head<2>());
   // Padding around bounding box to avoid numerical issues at cell boundaries.
   constexpr float kPadding = 1e-6f;
-  for (const sensor::RangefinderPoint& hit : range_data.returns) {
+  for (const sensor::RangefinderPoint& hit : range_data.returns) {  //jc:对雷达的returns进行遍历
     bounding_box.extend(hit.position.head<2>());
   }
   for (const sensor::RangefinderPoint& miss : range_data.misses) {
@@ -69,10 +69,10 @@ void CastRays(const sensor::RangeData& range_data,
   GrowAsNeeded(range_data, probability_grid);
 
   const MapLimits& limits = probability_grid->limits();
-  const double superscaled_resolution = limits.resolution() / kSubpixelScale;
+  const double superscaled_resolution = limits.resolution() / kSubpixelScale;  //jc:新的地图的分辨率为原来的1/1000
   const MapLimits superscaled_limits(
       superscaled_resolution, limits.max(),
-      CellLimits(limits.cell_limits().num_x_cells * kSubpixelScale,
+      CellLimits(limits.cell_limits().num_x_cells * kSubpixelScale, //jc:新的地图的大小为原来地图的1000倍
                  limits.cell_limits().num_y_cells * kSubpixelScale));
   // 雷达原点在地图中的像素坐标, 作为画线的起始坐标
   const Eigen::Array2i begin =
@@ -93,9 +93,9 @@ void CastRays(const sensor::RangeData& range_data,
   }
 
   // Now add the misses.
-  for (const Eigen::Array2i& end : ends) {
+  for (const Eigen::Array2i& end : ends) {  //jc:从激光雷达位置到激光点之间的栅格（free），上面只更新了激光点的栅格
     std::vector<Eigen::Array2i> ray =
-        RayToPixelMask(begin, end, kSubpixelScale);
+        RayToPixelMask(begin, end, kSubpixelScale);  //jc:获取从begin到end之间的所有的坐标存到ray
     for (const Eigen::Array2i& cell_index : ray) {
       // 从起点到end点之前, 更新miss点的栅格值
       probability_grid->ApplyLookupTable(cell_index, miss_table);
@@ -103,7 +103,7 @@ void CastRays(const sensor::RangeData& range_data,
   }
 
   // Finally, compute and add empty rays based on misses in the range data.
-  for (const sensor::RangefinderPoint& missing_echo : range_data.misses) {
+  for (const sensor::RangefinderPoint& missing_echo : range_data.misses) {   //jc:misses点为超过最大阈值的点
     std::vector<Eigen::Array2i> ray = RayToPixelMask(
         begin, superscaled_limits.GetCellIndex(missing_echo.position.head<2>()),
         kSubpixelScale);

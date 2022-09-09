@@ -106,7 +106,7 @@ Grid2D::Grid2D(const proto::Grid2D& proto,
 
 // Finishes the update sequence.
 // 插入雷达数据结束
-void Grid2D::FinishUpdate() {
+void Grid2D::FinishUpdate() {   //
   while (!update_indices_.empty()) {
     DCHECK_GE(correspondence_cost_cells_[update_indices_.back()],
               kUpdateMarker);
@@ -122,7 +122,7 @@ void Grid2D::FinishUpdate() {
 void Grid2D::ComputeCroppedLimits(Eigen::Array2i* const offset,
                                   CellLimits* const limits) const {
   if (known_cells_box_.isEmpty()) {
-    *offset = Eigen::Array2i::Zero();
+    *offset = Eigen::Array2i::Zero();   //jc:offset为bouding_box最小的坐标，最接近于地图左上角，limits为bouding_box的size;bouding_box为像素坐标，
     *limits = CellLimits(1, 1);
     return;
   }
@@ -146,7 +146,7 @@ void Grid2D::GrowLimits(const Eigen::Vector2f& point,
                         const std::vector<uint16>& grids_unknown_cell_values) {
   CHECK(update_indices_.empty());
   // 判断该点是否在地图坐标系内
-  while (!limits_.Contains(limits_.GetCellIndex(point))) {
+  while (!limits_.Contains(limits_.GetCellIndex(point))) {   //jc:如果这帧的栅格数据在当前的地图之外了就对地图进行扩大
     const int x_offset = limits_.cell_limits().num_x_cells / 2;
     const int y_offset = limits_.cell_limits().num_y_cells / 2;
     // 将xy扩大至2倍, 中心点不变, 向四周扩大
