@@ -44,7 +44,7 @@ ThreadPool::ThreadPool(int num_threads) {
   absl::MutexLock locker(&mutex_);
   for (int i = 0; i != num_threads; ++i) {
     pool_.emplace_back([this]() { ThreadPool::DoWork(); });
-  }
+  }//jc:启动四个for循环来不断的进行，直到任务为空并且runing为false，线程结束自动进行析构
 }
 
 // 只有等待 pool_ 结束所有的线程(join是等待直到线程结束),ThreadPool才能析构完成
@@ -68,7 +68,7 @@ void ThreadPool::NotifyDependenciesCompleted(Task* task) {
   CHECK(it != tasks_not_ready_.end());
 
   // 加入到任务队列中
-  task_queue_.push_back(it->second);
+  task_queue_.push_back(it->second);//jc:task_queue_都在Dowork里面用
   // 从未准备好的任务队列中删除task
   tasks_not_ready_.erase(it);
 }
@@ -123,7 +123,7 @@ void ThreadPool::DoWork() {
     CHECK_EQ(task->GetState(), common::Task::DEPENDENCIES_COMPLETED);
 
     // 执行task
-    Execute(task.get());
+    Execute(task.get());//jc:执行到这里就停住了
   }
 }
 

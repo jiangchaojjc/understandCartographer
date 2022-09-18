@@ -132,7 +132,8 @@ void ConstraintBuilder2D::MaybeAddConstraint(
   });
 
   // 等匹配器之后初始化才能进行约束的计算
-  constraint_task->AddDependency(scan_matcher->creation_task_handle);
+   //jc:添加本任务依赖的任务scan_matcher->creation_task_handle
+  constraint_task->AddDependency(scan_matcher->creation_task_handle);//jc:调用task.cc89行
   // 将计算约束这个任务放入线程池等待执行
   auto constraint_task_handle =
       thread_pool_->Schedule(std::move(constraint_task));
@@ -314,7 +315,7 @@ void ConstraintBuilder2D::ComputeConstraint(
   else {
     // 节点与局部地图进行匹配
     kConstraintsSearchedMetric->Increment();
-    if (submap_scan_matcher.fast_correlative_scan_matcher->Match(
+    if (submap_scan_matcher.fast_correlative_scan_matcher->Match( //jc:基于分支定界算法的匹配
             initial_pose, constant_data->filtered_gravity_aligned_point_cloud,
             options_.min_score(), &score, &pose_estimate)) {
       // We've reported a successful local match.
@@ -381,7 +382,7 @@ void ConstraintBuilder2D::RunWhenDoneCallback() {
   std::unique_ptr<std::function<void(const Result&)>> callback;
   {
     absl::MutexLock locker(&mutex_);
-    CHECK(when_done_ != nullptr);
+    CHECK(when_done_ != nullptr);  //jc:这个when_done在205行由call_back赋值
 
     // 将计算完的约束进行保存
     for (const std::unique_ptr<Constraint>& constraint : constraints_) {
@@ -403,7 +404,7 @@ void ConstraintBuilder2D::RunWhenDoneCallback() {
     kQueueLengthMetric->Set(constraints_.size());
   }
   // 执行回调函数 HandleWorkQueue
-  (*callback)(result);
+  (*callback)(result); //jc:这里的callback就是when_done，所以就是传入的callback也就是handleworkqueue 
 }
 
 // 获取完成约束计算节点的总个数

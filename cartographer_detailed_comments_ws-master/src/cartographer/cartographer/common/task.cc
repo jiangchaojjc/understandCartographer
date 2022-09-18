@@ -33,7 +33,7 @@ Task::State Task::GetState() {
 }
 
 // 设置本Task需要执行的任务 （函数） 
-// 状态: NEW
+// 状态: NEW//jc:在这里保存一下任务
 void Task::SetWorkItem(const WorkItem& work_item) {
   absl::MutexLock locker(&mutex_);
   CHECK_EQ(state_, NEW);
@@ -69,19 +69,19 @@ void Task::AddDependency(std::weak_ptr<Task> dependency) {
 // 状态: NEW -> DISPATCHED || NEW -> DISPATCHED -> DEPENDENCIES_COMPLETED
 void Task::SetThreadPool(ThreadPoolInterface* thread_pool) {
   absl::MutexLock locker(&mutex_);
-  CHECK_EQ(state_, NEW);
+  CHECK_EQ(state_, NEW); //jc:新传入的任务的stratus一定是new
 
   // 将任务状态设置为 DISPATCHED
   state_ = DISPATCHED;
 
   // 将thread_pool_to_notify_指针指向传入的thread_pool
-  thread_pool_to_notify_ = thread_pool;
-
+  thread_pool_to_notify_ = thread_pool; //jc:这个是线程池的指针，所以可以用线程池的函数
+  //jc:task先经历了构造的过程，所以uncompleted_dependencies_开始肯定是0，进行下面的判断
   // 如果本Task没有未完成的依赖, 则通知线程池可以将本任务放入到执行队列中
-  if (uncompleted_dependencies_ == 0) {
+  if (uncompleted_dependencies_ == 0) { //jc:constraint_builder_2d.cc135行添加依赖AddDependency
     state_ = DEPENDENCIES_COMPLETED;
     CHECK(thread_pool_to_notify_);
-    thread_pool_to_notify_->NotifyDependenciesCompleted(this);
+    thread_pool_to_notify_->NotifyDependenciesCompleted(this);//jc:调用thread_pool.cc63行
   }
 }
 
@@ -124,15 +124,15 @@ void Task::Execute() {
 
   // Execute the work item.
   if (work_item_) {
-    work_item_();
+    work_item_();  //jc:这里才是真正的执行任务
   }
 
   absl::MutexLock locker(&mutex_);
-  state_ = COMPLETED;
+  state_ = COMPLETED;//jc:任务执行完之后标记为完成状态
 
   // 通知依赖本任务的其他任务, 本任务执行完了
   for (Task* dependent_task : dependent_tasks_) {
-    dependent_task->OnDependenyCompleted();
+    dependent_task->OnDependenyCompleted();//jc:dependent_tasks_是别的任务
   }
 }
 

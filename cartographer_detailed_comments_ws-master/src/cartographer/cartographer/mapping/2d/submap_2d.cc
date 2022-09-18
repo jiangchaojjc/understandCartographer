@@ -195,7 +195,7 @@ std::vector<std::shared_ptr<const Submap2D>> ActiveSubmaps2D::InsertRangeData(
   if (submaps_.empty() ||
       submaps_.back()->num_range_data() == options_.num_range_data()) {   //jc:当submaps_.front()->num_range_data() == 180 时 submaps_.back()->num_range_data() ==90
     AddSubmap(range_data.origin.head<2>());  //jc:将扫描匹配之后的数据的坐标原点取出来作为地图的原点（local坐标系下）  到submap_2d.cc的278行
-  }
+  }  //jc:如果前端完成更新了，后端又不会对子图进行更改，所以出现叠图
   // 将一帧雷达数据同时写入两个子图中
   for (auto& submap : submaps_) {
     submap->InsertRangeData(range_data, range_data_inserter_.get());  //jc: 不断的调用这个函数,这个函数就是插入地图数据，直到num_range_data_ = 90

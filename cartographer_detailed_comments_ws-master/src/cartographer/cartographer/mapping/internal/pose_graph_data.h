@@ -62,10 +62,10 @@ struct InternalSubmapData {
   // becomes 'kFinished'.
   // 插入到此地图中的节点的 ID
   // 当此子图变为“kFinished”后, 这些节点将不再与这个地图进行匹配.
-  std::set<NodeId> node_ids;
+  std::set<NodeId> node_ids;//jc:插入到某个子图中的节点的id的集合
 };
 
-struct PoseGraphData {
+struct PoseGraphData {  //jc:存了后端优化里用的所有的数据
   // Submaps get assigned an ID and state as soon as they are seen, even
   // before they take part in the background computations.
 

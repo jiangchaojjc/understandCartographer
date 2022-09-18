@@ -83,14 +83,14 @@ void MaybeAddPureLocalizationTrimmer(
  * 
  * @param[in] options proto::MapBuilderOptions格式的 map_builder参数
  */
-MapBuilder::MapBuilder(const proto::MapBuilderOptions& options)
+MapBuilder::MapBuilder(const proto::MapBuilderOptions& options) //jc:在这里根据num_background_threads参数配置构造线程池，num_background_threads线程的个数
     : options_(options), thread_pool_(options.num_background_threads()) { // param: num_background_threads
-  CHECK(options.use_trajectory_builder_2d() ^
+  CHECK(options.use_trajectory_builder_2d() ^    
         options.use_trajectory_builder_3d());
 
   // 2d位姿图(后端)的初始化
   if (options.use_trajectory_builder_2d()) {
-    pose_graph_ = absl::make_unique<PoseGraph2D>(
+    pose_graph_ = absl::make_unique<PoseGraph2D>(  //jc:这里构造了poseGraph2D的构造函数
         options_.pose_graph_options(),
         absl::make_unique<optimization::OptimizationProblem2D>(
             options_.pose_graph_options().optimization_problem_options()),

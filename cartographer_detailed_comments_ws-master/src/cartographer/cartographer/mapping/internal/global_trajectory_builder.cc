@@ -94,8 +94,8 @@ class GlobalTrajectoryBuilder : public mapping::TrajectoryBuilderInterface {
       kLocalSlamInsertionResults->Increment();
 
       // 将匹配后的结果 当做节点 加入到位姿图中
-      auto node_id = pose_graph_->AddNode(
-          matching_result->insertion_result->constant_data, trajectory_id_,
+      auto node_id = pose_graph_->AddNode( //jc:调用pose_graph_2d.cc 226行addNode
+          matching_result->insertion_result->constant_data, trajectory_id_,//jc:insertion_result在local_trajectroy_builder_2d.h里48行定义
           matching_result->insertion_result->insertion_submaps);
           
       CHECK_EQ(node_id.trajectory_id, trajectory_id_);
@@ -120,12 +120,12 @@ class GlobalTrajectoryBuilder : public mapping::TrajectoryBuilderInterface {
   }
 
   // imu数据的处理, 数据走向有两个,一个是进入前端local_trajectory_builder_,一个是进入后端pose_graph_
-  void AddSensorData(const std::string& sensor_id,
+  void AddSensorData(const std::string& sensor_id, 
                      const sensor::ImuData& imu_data) override {
     if (local_trajectory_builder_) {
       local_trajectory_builder_->AddImuData(imu_data);
     }
-    pose_graph_->AddImuData(trajectory_id_, imu_data);
+    pose_graph_->AddImuData(trajectory_id_, imu_data);  //jc:调用pose_graph_2d.cc304行
   }
 
   // 里程计数据的处理, 数据走向有两个,一个是进入前端local_trajectory_builder_, 一个是进入后端pose_graph_
