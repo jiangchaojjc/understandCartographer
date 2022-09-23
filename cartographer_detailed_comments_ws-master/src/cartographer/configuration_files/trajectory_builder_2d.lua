@@ -105,7 +105,7 @@ TRAJECTORY_BUILDER_2D = {
       -- 概率占用栅格地图的一些配置
       probability_grid_range_data_inserter = {
         insert_free_space = true,
-        hit_probability = 0.55,
+        hit_probability = 0.55,  //jc:击中之后的障碍物得分，分数累计到一定阈值，确认为障碍物
         miss_probability = 0.49,
       },
       -- tsdf地图的一些配置

@@ -342,16 +342,16 @@ void OptimizationProblem2D::Solve(
   
   // Step: 第一种残差 将节点与子图原点在global坐标系下的相对位姿 与 约束 的差值作为残差项
   // Add cost functions for intra- and inter-submap constraints.
-  for (const Constraint& constraint : constraints) {
+  for (const Constraint& constraint : constraints) {//jc:子图间约束是通过暴力匹配和seres匹配之后，即回环之后的约束，所以主要依靠子图间约束
     problem.AddResidualBlock(
         // 根据SPA论文中的公式计算出的残差的CostFunction
-        CreateAutoDiffSpaCostFunction(constraint.pose),
+        CreateAutoDiffSpaCostFunction(constraint.pose), //jc:计算第二个约束
         // Loop closure constraints should have a loss function.
         // 为闭环约束提供一个Huber的核函数,用于降低错误的闭环检测对最终的优化结果带来的负面影响
         constraint.tag == Constraint::INTER_SUBMAP // 核函数
-            ? new ceres::HuberLoss(options_.huber_scale()) // param: huber_scale
+            ? new ceres::HuberLoss(options_.huber_scale()) // param: huber_scale//jc:子图间约束就添加HuberLoss
             : nullptr,
-        C_submaps.at(constraint.submap_id).data(), // 2个优化变量
+        C_submaps.at(constraint.submap_id).data(), // 2个优化变量 //jc:优化之后这两个数据就会改变（所以是原始数据），这两个数据本身存在约束
         C_nodes.at(constraint.node_id).data());
   }
   

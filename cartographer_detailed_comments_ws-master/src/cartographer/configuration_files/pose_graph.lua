@@ -20,15 +20,15 @@ POSE_GRAPH = {
   constraint_builder = {
     sampling_ratio = 0.3,                 -- 对局部子图进行回环检测时的计算频率, 数值越大, 计算次数越多
     max_constraint_distance = 15.,        -- 对局部子图进行回环检测时能成为约束的最大距离
-    min_score = 0.55,                     -- 对局部子图进行回环检测时的最低分数阈值
-    global_localization_min_score = 0.6,  -- 对整体子图进行回环检测时的最低分数阈值
-    loop_closure_translation_weight = 1.1e4,
+    min_score = 0.55,                     -- 对局部子图进行回环检测时的最低分数阈值 //jc:这个是建图的时候控制回环的，值大回环少，值小，回环多；这个值定位的时候也用
+    global_localization_min_score = 0.6,  -- 对整体子图进行回环检测时的最低分数阈值  //jc:在进行纯定位的时候，如果定位或者回环效果不好，可以将这个参数改小，即分小也满足回环的条件。但是容易找到错误的定位。值大回环少，值小，回环多
+    loop_closure_translation_weight = 1.1e4, //jc:1.1 * 10 ^4次方
     loop_closure_rotation_weight = 1e5,
     log_matches = true,                   -- 打印约束计算的log
     
     -- 基于分支定界算法的2d粗匹配器
     fast_correlative_scan_matcher = {
-      linear_search_window = 7.,
+      linear_search_window = 7.,   //jc:7米 30弧度，分支定界的深度7
       angular_search_window = math.rad(30.),
       branch_and_bound_depth = 7,
     },

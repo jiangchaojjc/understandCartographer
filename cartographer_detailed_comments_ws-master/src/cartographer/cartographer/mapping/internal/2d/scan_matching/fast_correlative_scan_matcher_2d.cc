@@ -100,7 +100,7 @@ CreateFastCorrelativeScanMatcherOptions2D(
 PrecomputationGrid2D::PrecomputationGrid2D(
     const Grid2D& grid, const CellLimits& limits, const int width,
     std::vector<float>* reusable_intermediate_grid)
-    : offset_(-width + 1, -width + 1),
+    : offset_(-width + 1, -width + 1),  //jc:为了弥补划窗
       wide_limits_(limits.num_x_cells + width - 1,
                    limits.num_y_cells + width - 1),
       min_score_(1.f - grid.GetMaxCorrespondenceCost()), // 0.1 min_score_
@@ -116,13 +116,13 @@ PrecomputationGrid2D::PrecomputationGrid2D(
   std::vector<float>& intermediate = *reusable_intermediate_grid;
   intermediate.resize(wide_limits_.num_x_cells * limits.num_y_cells);
   
-  // 对每一行从左到右横着做一次滑窗, 将滑窗后的地图放在intermediate(临时数据)中
-  for (int y = 0; y != limits.num_y_cells; ++y) {
+  // 对每一行从左到右横着做一次滑窗, 将滑窗后的地图放在intermediate(临时数据)中  //jc:滑动窗口的计算和解释还是看5.10的视频比较好，容易理解，
+  for (int y = 0; y != limits.num_y_cells; ++y) {          //jc:滑动窗口的目的就是用多个值中的最大值代表这几个值，使得分辨率变粗
     SlidingWindowMaximum current_values;
-    // 获取 grid 的x坐标的索引: 首先获取 (0, y)
+    // 获取 grid 的x坐标的索引: 首先获取 (0, y)                       //jc:滑动窗口算法和分支定界算法可以好好看看
     current_values.AddValue(
-        1.f - std::abs(grid.GetCorrespondenceCost(Eigen::Array2i(0, y))));
-
+        1.f - std::abs(grid.GetCorrespondenceCost(Eigen::Array2i(0, y))));  //jc:将占用的概率填到划窗里；std::abs(grid.GetCorrespondenceCost(Eigen::Array2i(0, y))是空闲的概率
+        //jc:（0，y）这个点值地图的最左下角的值
     // Step: 1 滑动窗口在x方向开始划入地图, 所以只进行 填入值
     // intermediate的索引x + width - 1 + y * stride的范围是 [0, width-2] 再加上 y * stride
     // grid的索引 x + width 的坐标范围是 [1, width-1]
@@ -246,6 +246,7 @@ PrecomputationGridStack2D::PrecomputationGridStack2D(
   CHECK_GE(options.branch_and_bound_depth(), 1);
 
   // param: branch_and_bound_depth 默认为7, 确定 最大的分辨率, 也就是64个栅格合成一个格子
+  //jc:branch_and_bound_depth变大，内存就变大，分辨率地图多，计算时间变小（因为分辨率低越容易找到最大的score），分支定界时地图分辨率低，branch_and_bound_depth变小，内存就变小，计算时间变大
   const int max_width = 1 << (options.branch_and_bound_depth() - 1); // 64
   precomputation_grids_.reserve(options.branch_and_bound_depth());
   
@@ -369,8 +370,8 @@ bool FastCorrelativeScanMatcher2D::MatchWithSearchParameters(
   
   // Step: 进行基于分支定界算法的搜索, 获取最优解
   const Candidate2D best_candidate = BranchAndBound(
-      discrete_scans, search_parameters, lowest_resolution_candidates,
-      precomputation_grid_stack_->max_depth(), min_score); // param: max_depth
+      discrete_scans, search_parameters, lowest_resolution_candidates, //jc:第一次调用分支定界算法的时候传入的深度是6
+      precomputation_grid_stack_->max_depth(), min_score); // param: max_depth 
   
   // 检查最优解的值, 如果大于指定阈值min_score就认为匹配成功,否则认为不匹配返回失败
   if (best_candidate.score > min_score) {
@@ -397,16 +398,16 @@ FastCorrelativeScanMatcher2D::ComputeLowestResolutionCandidates(
 
   // 计算每个候选解的得分, 按照匹配得分从大到小排序, 返回排列好的candidates 
   ScoreCandidates(
-      precomputation_grid_stack_->Get(precomputation_grid_stack_->max_depth()),
+      precomputation_grid_stack_->Get(precomputation_grid_stack_->max_depth()), //jc:Get获取指定层的地图，这里获取最粗分辨率的地图
       discrete_scans, search_parameters, &lowest_resolution_candidates);
   return lowest_resolution_candidates;
 }
 
 // 生成最低分辨率层(栅格最粗)上的所有候选解
 std::vector<Candidate2D>
-FastCorrelativeScanMatcher2D::GenerateLowestResolutionCandidates(
+FastCorrelativeScanMatcher2D::GenerateLowestResolutionCandidates(  
     const SearchParameters& search_parameters) const {
-  const int linear_step_size = 1 << precomputation_grid_stack_->max_depth();
+  const int linear_step_size = 1 << precomputation_grid_stack_->max_depth(); //jc:最粗的分辨率的每个格子的size
   int num_candidates = 0;
   // 遍历旋转后的每个点云
   for (int scan_index = 0; scan_index != search_parameters.num_scans;
@@ -415,7 +416,7 @@ FastCorrelativeScanMatcher2D::GenerateLowestResolutionCandidates(
     // X方向候选解的个数
     const int num_lowest_resolution_linear_x_candidates =
         (search_parameters.linear_bounds[scan_index].max_x -
-         search_parameters.linear_bounds[scan_index].min_x + linear_step_size) /
+         search_parameters.linear_bounds[scan_index].min_x + linear_step_size) /  //jc:经过划窗之后地图会变大，所以要加linear_step_size
         linear_step_size;
 
     // Y方向候选解的个数
@@ -489,8 +490,8 @@ void FastCorrelativeScanMatcher2D::ScoreCandidates(
  * @param[in] discrete_scans 多个点云的每个点在地图上的栅格坐标
  * @param[in] search_parameters 搜索配置参数
  * @param[in] candidates 候选解
- * @param[in] candidate_depth 搜索树高度
- * @param[in] min_score 候选点最小得分
+ * @param[in] candidate_depth 搜索树高度 //jc:当前的层数
+ * @param[in] min_score 候选点最小得分    //jc:match函数传入的是pose_graph.lua中的23行min_score；matchfullSubMap传入的是pose_graph.lua24行的global_localization
  * @return Candidate2D 最优解
  */
 Candidate2D FastCorrelativeScanMatcher2D::BranchAndBound(
@@ -503,7 +504,7 @@ Candidate2D FastCorrelativeScanMatcher2D::BranchAndBound(
   // 首先给出了递归终止的条件, 就是如果到了第0层(到底了), 意味着我们搜索到了一个叶子节点.
   // 同时由于每次迭代过程我们都是对新扩展的候选点进行降序排列
   // 所以队首的这个叶子节点就是最优解, 直接返回即可
-  if (candidate_depth == 0) {
+  if (candidate_depth == 0) {    
     // Return the best candidate.
     return *candidates.begin();
   }
@@ -515,18 +516,18 @@ Candidate2D FastCorrelativeScanMatcher2D::BranchAndBound(
   // 遍历所有的候选点
   for (const Candidate2D& candidate : candidates) {
     //  Step: 剪枝 低于设置的阈值 或者 低于上一层的可行解的最高分 的可行解不进行继续分枝
-    // 如果遇到一个候选点的分低于阈值, 那么后边的候选解的得分也会低于阈值,就可以直接跳出循环了
-    if (candidate.score <= min_score) {
-      break;
-    }
-
+    // 如果遇到一个候选点的分低于阈值, 那么后边的候选解的得分也会低于阈值,就可以直接跳出循环了  //jc:初始时刻第6层的n个解的min_score都是0.2的初始值，但是他的下一层的值被更新成了best
+    if (candidate.score <= min_score) {   //jc:min_score这个是分支定界的下界，如果小于这个就不用再往下分了
+      break;  //jc:第一次从第6层往下算时，取第5层中值最大的一个作为下一层的bestscore再往下，但是不会更新min_score,直到candidate_depth == 0，返回得分最大的一个数作为第5层的min_score；
+    }//jc:再次从第6层的其他解往下算时，到第5层的min_score就是更新之后的min_score了，所以会过滤第5层位姿上小于min_socre的其他解 
+      //jc:只要第6层的其他解的第5层的解小于min_score就不再往下算，直接break,因为score已经排序了
     // 如果for循环能够继续运行, 说明当前候选点是一个更优的选择, 需要对其进行分枝
     std::vector<Candidate2D> higher_resolution_candidates;
     // 搜索步长减为上层的一半
-    const int half_width = 1 << (candidate_depth - 1);
+    const int half_width = 1 << (candidate_depth - 1); //jc:half_width = 深度-1 再左移1位，变成了需要移动的格子数  ；candidate_depth为深度，深度越深，分辨率越低
 
     // Step: 分枝 对x、y偏移进行遍历, 求出candidate的四个子节点候选解
-    for (int x_offset : {0, half_width}) { // 只能取0和half_width
+    for (int x_offset : {0, half_width}) { // 只能取0和half_width   
       // 如果超过了界限, 就跳过
       if (candidate.x_index_offset + x_offset >
           search_parameters.linear_bounds[candidate.scan_index].max_x) {
@@ -545,7 +546,7 @@ Candidate2D FastCorrelativeScanMatcher2D::BranchAndBound(
       }
     }
 
-    // 对新生成的4个候选解进行打分与排序, 同一个点云, 不同地图
+    // 对新生成的4个候选解进行打分与排序, 同一个点云, 不同地图 //jc:上一层的地图
     ScoreCandidates(precomputation_grid_stack_->Get(candidate_depth - 1),
                     discrete_scans, search_parameters,
                     &higher_resolution_candidates);

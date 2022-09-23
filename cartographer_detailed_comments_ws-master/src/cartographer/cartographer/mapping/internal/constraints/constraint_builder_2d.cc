@@ -95,8 +95,8 @@ void ConstraintBuilder2D::MaybeAddConstraint(
     const NodeId& node_id, const TrajectoryNode::Data* const constant_data,
     const transform::Rigid2d& initial_relative_pose) {
   // 超过范围的不进行约束的计算
-  if (initial_relative_pose.translation().norm() >
-      options_.max_constraint_distance()) { // param: max_constraint_distance
+  if (initial_relative_pose.translation().norm() >//jc:max_constraint_distance 超过这个范围就不进行回环检测，因为要和所有已经完成的子图进行匹配，所以计算量大
+      options_.max_constraint_distance()) { // param: max_constraint_distance  
     return;
   }
   // 根据参数配置添加约束的频率
@@ -133,8 +133,8 @@ void ConstraintBuilder2D::MaybeAddConstraint(
 
   // 等匹配器之后初始化才能进行约束的计算
    //jc:添加本任务依赖的任务scan_matcher->creation_task_handle
-  constraint_task->AddDependency(scan_matcher->creation_task_handle);//jc:调用task.cc89行
-  // 将计算约束这个任务放入线程池等待执行
+  constraint_task->AddDependency(scan_matcher->creation_task_handle);//jc:调用task.cc89行   //jc:这里要使用多分辨率地图必须等多分辨率地图建完，
+  // 将计算约束这个任务放入线程池等待执行 //jc:scan_matcher->creation_task_handle就是构造多分辨率地图
   auto constraint_task_handle =
       thread_pool_->Schedule(std::move(constraint_task));
   // 将计算约束这个任务 添加到 finish_node_task_的依赖项中
@@ -165,7 +165,7 @@ void ConstraintBuilder2D::MaybeAddGlobalConstraint(
   auto* const constraint = &constraints_.back();
   // 为子图新建一个匹配器
   const auto* scan_matcher =
-      DispatchScanMatcherConstruction(submap_id, submap->grid());
+      DispatchScanMatcherConstruction(submap_id, submap->grid()); //jc:生成多分辨率地图
   auto constraint_task = absl::make_unique<common::Task>();
   // 生成个计算全局约束的任务
   constraint_task->SetWorkItem([=]() LOCKS_EXCLUDED(mutex_) {
@@ -184,7 +184,7 @@ void ConstraintBuilder2D::NotifyEndOfNode() {
   absl::MutexLock locker(&mutex_);
   CHECK(finish_node_task_ != nullptr);
   
-  // 生成个任务: 将num_finished_nodes_自加, 记录完成约束计算节点的总个数
+  // 生成个任务: 将num_finished_nodes_自加, 记录完成约束计算节点的总个数 //jc:记录完成约束计算,计算这个节点约束的总个数ComputeConstraint
   finish_node_task_->SetWorkItem([this] {
     absl::MutexLock locker(&mutex_);
     ++num_finished_nodes_;
@@ -197,7 +197,7 @@ void ConstraintBuilder2D::NotifyEndOfNode() {
   // move之后finish_node_task_就没有指向的地址了, 所以这里要重新初始化
   finish_node_task_ = absl::make_unique<common::Task>();
   // 设置when_done_task_依赖finish_node_task_handle
-  when_done_task_->AddDependency(finish_node_task_handle);
+  when_done_task_->AddDependency(finish_node_task_handle); //jc:finish_node_task_handle依赖于
   ++num_started_nodes_;
 }
 
@@ -244,7 +244,7 @@ ConstraintBuilder2D::DispatchScanMatcherConstruction(const SubmapId& submap_id,
         // 进行匹配器的初始化, 与多分辨率地图的创建
         submap_scan_matcher.fast_correlative_scan_matcher =
             absl::make_unique<scan_matching::FastCorrelativeScanMatcher2D>(
-                *submap_scan_matcher.grid, scan_matcher_options);
+                *submap_scan_matcher.grid, scan_matcher_options);  //jc:这里一个地图就变成7张地图了，生成了多分辨率地图，其实栅格数一样，只不过分辨率低的多个栅格代表一个
       });
   // 将初始化匹配器的任务放入线程池中, 并且将任务的智能指针保存起来
   submap_scan_matcher.creation_task_handle =
@@ -277,7 +277,7 @@ void ConstraintBuilder2D::ComputeConstraint(
 
   // Step:1 得到节点在local frame下的坐标
   const transform::Rigid2d initial_pose =
-      ComputeSubmapPose(*submap) * initial_relative_pose;
+      ComputeSubmapPose(*submap) * initial_relative_pose;  //jc:initial_relative_pose在pose_graph_2d.cc 422行，代表子图间相对变换，ComputeSubmapPose(*submap)为子图在local坐标系下的坐标
 
   // The 'constraint_transform' (submap i <- node j) is computed from:
   // - a 'filtered_gravity_aligned_point_cloud' in node j,
@@ -343,10 +343,11 @@ void ConstraintBuilder2D::ComputeConstraint(
                             *submap_scan_matcher.grid, &pose_estimate,
                             &unused_summary);
 
-  // Step:4 获取节点到submap坐标系原点间的坐标变换
-  // pose_estimate 是 节点在 loacl frame 下的坐标
-  const transform::Rigid2d constraint_transform =
-      ComputeSubmapPose(*submap).inverse() * pose_estimate;
+  //jc:这里是计算子图间约束
+  // Step:4 获取节点到submap坐标系原点间的坐标变换 //jc:子图原点到tracking_frame(tracking_frame为carto跟踪的坐标系)的坐标变换；作者的节点可能就是指tracking_frame
+  // pose_estimate 是 节点在 loacl frame 下的坐标 //jc:子图内约束和子图间都是子图原点到节点（节点==pose_estimate==tracking_frame）(tracking_frame为carto跟踪的坐标系)的坐标变换
+  const transform::Rigid2d constraint_transform =     //jc:子图原点到匹配之后的pose_estimate，得到相对坐标变换
+      ComputeSubmapPose(*submap).inverse() * pose_estimate; //jc:子图在local坐标系下的inverse * pose_estimate 得到子图到节点在Local坐标系下的坐标变换，即子图间约束，看箭头图
 
   // Step:5 返回计算后的约束
   constraint->reset(new Constraint{submap_id,
