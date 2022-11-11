@@ -29,8 +29,8 @@ namespace cartographer_ros {
 struct TrajectoryOptions {
   ::cartographer::mapping::proto::TrajectoryBuilderOptions
       trajectory_builder_options;
-  std::string tracking_frame;
-  std::string published_frame;
+  std::string tracking_frame;   //jc:跟踪的坐标系。在没有imu的情况下，tracking_frame = base_link
+  std::string published_frame;  //jc:发布pose的坐标系，在没有imu的情况下，published_frame = odom
   std::string odom_frame;
   bool provide_odom_frame;
   bool use_odometry;

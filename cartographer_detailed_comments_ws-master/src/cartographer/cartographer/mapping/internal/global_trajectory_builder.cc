@@ -70,7 +70,7 @@ class GlobalTrajectoryBuilder : public mapping::TrajectoryBuilderInterface {
    * @param[in] sensor_id topic名字
    * @param[in] timed_point_cloud_data 点云数据
    */
-  void AddSensorData(
+  void AddSensorData(           //jc: sensor_bridge.cc 284行 HandleRangefinder调用
       const std::string& sensor_id,
       const sensor::TimedPointCloudData& timed_point_cloud_data) override {
     CHECK(local_trajectory_builder_)
@@ -78,7 +78,7 @@ class GlobalTrajectoryBuilder : public mapping::TrajectoryBuilderInterface {
 
     // 进行扫描匹配, 返回匹配后的结果
     std::unique_ptr<typename LocalTrajectoryBuilder::MatchingResult>
-        matching_result = local_trajectory_builder_->AddRangeData(
+        matching_result = local_trajectory_builder_->AddRangeData(  //jc:调用local_trajectory_builder_2d.cc 140行
             sensor_id, timed_point_cloud_data);
 
     if (matching_result == nullptr) {

@@ -137,13 +137,13 @@ std::unique_ptr<transform::Rigid2d> LocalTrajectoryBuilder2D::ScanMatch(
  * @return std::unique_ptr<LocalTrajectoryBuilder2D::MatchingResult> 匹配后的结果
  */
 std::unique_ptr<LocalTrajectoryBuilder2D::MatchingResult>
-LocalTrajectoryBuilder2D::AddRangeData(
+LocalTrajectoryBuilder2D::AddRangeData(      //jc:global_trajectroy_builder.cc 中的73行AddSensorData调用
     const std::string& sensor_id,
     const sensor::TimedPointCloudData& unsynchronized_data) {
   
   // Step: 1 进行多个雷达点云数据的时间同步, 点云的坐标是相对于tracking_frame的
   auto synchronized_data =
-      range_data_collator_.AddRangeData(sensor_id, unsynchronized_data);
+      range_data_collator_.AddRangeData(sensor_id, unsynchronized_data);  
   if (synchronized_data.ranges.empty()) {
     LOG(INFO) << "Range data collator filling buffer.";
     return nullptr;
@@ -385,7 +385,7 @@ LocalTrajectoryBuilder2D::AddAccumulatedRangeData(   //logic:本类 140行 AddRa
  * @return std::unique_ptr<LocalTrajectoryBuilder2D::InsertionResult> 
  */
 std::unique_ptr<LocalTrajectoryBuilder2D::InsertionResult>
-LocalTrajectoryBuilder2D::InsertIntoSubmap(
+LocalTrajectoryBuilder2D::InsertIntoSubmap(   //logic:294行AddAccumulatedRangeData调用
     const common::Time time, const sensor::RangeData& range_data_in_local,
     const sensor::PointCloud& filtered_gravity_aligned_point_cloud,
     const transform::Rigid3d& pose_estimate,

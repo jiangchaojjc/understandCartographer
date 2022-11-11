@@ -44,7 +44,7 @@ ThreadPool::ThreadPool(int num_threads) {
   absl::MutexLock locker(&mutex_);
   for (int i = 0; i != num_threads; ++i) {
     pool_.emplace_back([this]() { ThreadPool::DoWork(); });
-  }//jc:启动四个for循环来不断的进行，直到任务为空并且runing为false，线程结束自动进行析构
+  }//jc:创建线程池启动四个for循环来不断的进行，直到任务为空并且runing为false，线程结束自动进行析构
 }
 
 // 只有等待 pool_ 结束所有的线程(join是等待直到线程结束),ThreadPool才能析构完成
@@ -54,7 +54,7 @@ ThreadPool::~ThreadPool() {
     CHECK(running_);
     running_ = false;
   }
-  for (std::thread& thread : pool_) {
+  for (std::thread& thread : pool_) {  
     thread.join();
   }
 }

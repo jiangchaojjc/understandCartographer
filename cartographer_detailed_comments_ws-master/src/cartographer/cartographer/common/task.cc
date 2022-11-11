@@ -124,7 +124,7 @@ void Task::Execute() {
 
   // Execute the work item.
   if (work_item_) {
-    work_item_();  //jc:这里才是真正的执行任务
+    work_item_();  //jc:这里才是在线程池里真正执行任务
   }
 
   absl::MutexLock locker(&mutex_);

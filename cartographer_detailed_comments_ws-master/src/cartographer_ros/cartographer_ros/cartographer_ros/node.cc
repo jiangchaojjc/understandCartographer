@@ -313,7 +313,7 @@ void Node::AddExtrapolator(const int trajectory_id,
   // https://www.cnblogs.com/guxuanqing/p/11396511.html
 
   // 以1ms, 以及重力常数10, 作为参数构造PoseExtrapolator
-  extrapolators_.emplace(
+  extrapolators_.emplace(    //jc:定义在node.h 234行 map类型
       std::piecewise_construct, 
       std::forward_as_tuple(trajectory_id),
       std::forward_as_tuple(
@@ -605,18 +605,18 @@ int Node::AddTrajectory(const TrajectoryOptions& options) {
   const std::set<cartographer::mapping::TrajectoryBuilderInterface::SensorId>
       expected_sensor_ids = ComputeExpectedSensorIds(options);
 
-  // 调用map_builder_bridge的AddTrajectory, 添加一个轨迹
+  // 调用map_builder_bridge的AddTrajectory 138行, 添加一个轨迹
   const int trajectory_id =
       map_builder_bridge_.AddTrajectory(expected_sensor_ids, options);
 
   // 新增一个位姿估计器
-  AddExtrapolator(trajectory_id, options);
+  AddExtrapolator(trajectory_id, options); //jc:调用本文件292行
 
   // 新生成一个传感器数据采样器
-  AddSensorSamplers(trajectory_id, options);
+  AddSensorSamplers(trajectory_id, options); //jc:调用本文件330行
 
   // 订阅话题与注册回调函数
-  LaunchSubscribers(options, trajectory_id);
+  LaunchSubscribers(options, trajectory_id);//jc:调用本文件641行
 
   // 创建了一个3s执行一次的定时器,由于oneshot=true, 所以只执行一次
   // 检查设置的topic名字是否在ros中存在, 不存在则报错
@@ -905,7 +905,7 @@ void Node::StartTrajectoryWithDefaultTopics(const TrajectoryOptions& options) {
   absl::MutexLock lock(&mutex_);
   // 检查TrajectoryOptions是否存在2d或者3d轨迹的配置信息
   CHECK(ValidateTrajectoryOptions(options));
-  // 添加一条轨迹
+  // 添加一条轨迹//jc:调用本文件603行
   AddTrajectory(options);
 }
 
@@ -936,7 +936,7 @@ int Node::AddOfflineTrajectory(
   absl::MutexLock lock(&mutex_);
   const int trajectory_id =
       map_builder_bridge_.AddTrajectory(expected_sensor_ids, options);
-  AddExtrapolator(trajectory_id, options);
+  AddExtrapolator(trajectory_id, options);  
   AddSensorSamplers(trajectory_id, options);
   return trajectory_id;
 }
@@ -1206,7 +1206,7 @@ void Node::HandleMultiEchoLaserScanMessage(
 }
 
 // 调用SensorBridge的传感器处理函数进行数据处理
-void Node::HandlePointCloud2Message(
+void Node::HandlePointCloud2Message(   //jc:node.cc 641行 LaunchSubscribers调用
     const int trajectory_id, const std::string& sensor_id,
     const sensor_msgs::PointCloud2::ConstPtr& msg) {
   absl::MutexLock lock(&mutex_);
@@ -1214,7 +1214,7 @@ void Node::HandlePointCloud2Message(
     return;
   }
   map_builder_bridge_.sensor_bridge(trajectory_id)
-      ->HandlePointCloud2Message(sensor_id, msg);
+      ->HandlePointCloud2Message(sensor_id, msg);  //jc:调用sensor_bridge.cc 208行
 }
 
 void Node::SerializeState(const std::string& filename,

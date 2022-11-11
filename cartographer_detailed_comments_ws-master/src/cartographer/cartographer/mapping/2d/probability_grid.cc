@@ -115,7 +115,7 @@ std::unique_ptr<Grid2D> ProbabilityGrid::ComputeCroppedGrid() const {
   Eigen::Array2i offset;
   CellLimits cell_limits;
   // 根据bounding_box对栅格地图进行裁剪
-  ComputeCroppedLimits(&offset, &cell_limits);
+  ComputeCroppedLimits(&offset, &cell_limits);  //logic:调用grid_2d.cc  122行
   const double resolution = limits().resolution();
   // 重新计算最大值坐标
   const Eigen::Vector2d max =

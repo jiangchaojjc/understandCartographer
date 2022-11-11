@@ -31,7 +31,7 @@ bool isEqual(const Eigen::Array2i& lhs, const Eigen::Array2i& rhs) {
 // 'scaled_begin' and 'scaled_end'. 'scaled_begin' and 'scaled_end' are scaled
 // by 'subpixel_scale'. 'scaled_begin' and 'scaled_end' are expected to be
 // greater than zero. Return values are in pixels and not scaled.
-std::vector<Eigen::Array2i> RayToPixelMask(const Eigen::Array2i& scaled_begin,
+std::vector<Eigen::Array2i> RayToPixelMask(const Eigen::Array2i& scaled_begin,  //jc:贝汉名算法画栅格地图 probability_grid_range_data_inserter_2d.cc 64行调用
                                            const Eigen::Array2i& scaled_end,
                                            int subpixel_scale) {
   // For simplicity, we order 'scaled_begin' and 'scaled_end' by their x

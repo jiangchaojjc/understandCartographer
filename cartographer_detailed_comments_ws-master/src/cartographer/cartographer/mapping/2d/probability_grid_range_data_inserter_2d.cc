@@ -61,7 +61,7 @@ void GrowAsNeeded(const sensor::RangeData& range_data,
  * @param[in] insert_free_space 
  * @param[in] probability_grid 栅格地图
  */
-void CastRays(const sensor::RangeData& range_data,
+void CastRays(const sensor::RangeData& range_data,  //logic:由本文件的 152行调用
               const std::vector<uint16>& hit_table,
               const std::vector<uint16>& miss_table,
               const bool insert_free_space, ProbabilityGrid* probability_grid) {
@@ -95,7 +95,7 @@ void CastRays(const sensor::RangeData& range_data,
   // Now add the misses.
   for (const Eigen::Array2i& end : ends) {  //jc:从激光雷达位置到激光点之间的栅格（free），上面只更新了激光点的栅格
     std::vector<Eigen::Array2i> ray =
-        RayToPixelMask(begin, end, kSubpixelScale);  //jc:获取从begin到end之间的所有的坐标存到ray
+        RayToPixelMask(begin, end, kSubpixelScale);  //jc:获取从begin到end之间的所有的坐标存到ray，通过贝汉名算法获取具体栅格坐标
     for (const Eigen::Array2i& cell_index : ray) {
       // 从起点到end点之前, 更新miss点的栅格值
       probability_grid->ApplyLookupTable(cell_index, miss_table);
@@ -149,7 +149,7 @@ ProbabilityGridRangeDataInserter2D::ProbabilityGridRangeDataInserter2D(
  * @param[in] range_data 要写入地图的点云
  * @param[in] grid 栅格地图
  */
-void ProbabilityGridRangeDataInserter2D::Insert(
+void ProbabilityGridRangeDataInserter2D::Insert(  //logic:由probability_grid_points_peocessor.cc 129行调用
     const sensor::RangeData& range_data, GridInterface* const grid) const {
   ProbabilityGrid* const probability_grid = static_cast<ProbabilityGrid*>(grid);
   CHECK(probability_grid != nullptr);

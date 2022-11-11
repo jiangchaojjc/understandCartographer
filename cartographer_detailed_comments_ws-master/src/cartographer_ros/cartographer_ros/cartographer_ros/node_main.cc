@@ -55,7 +55,7 @@ DEFINE_string(
 namespace cartographer_ros {
 namespace {
 
-void Run() {
+void Run() {   //jc:程序从这里开始处理
   constexpr double kTfBufferCacheTimeInSeconds = 10.;
   tf2_ros::Buffer tf_buffer{::ros::Duration(kTfBufferCacheTimeInSeconds)};
   // 开启监听tf的独立线程

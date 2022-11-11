@@ -77,7 +77,7 @@ void RegisterFileWritingPointsProcessorWithTrajectories(
       });
 }
 
-void RegisterBuiltInPointsProcessors(
+void RegisterBuiltInPointsProcessors(   //logic:由assets_writer.cc 58行调用
     const std::vector<mapping::proto::Trajectory>& trajectories,
     const FileWriterFactory& file_writer_factory,
     PointsProcessorPipelineBuilder* builder) {
