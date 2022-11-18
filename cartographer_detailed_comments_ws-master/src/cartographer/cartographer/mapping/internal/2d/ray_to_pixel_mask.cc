@@ -65,7 +65,7 @@ std::vector<Eigen::Array2i> RayToPixelMask(const Eigen::Array2i& scaled_begin,  
   }
 
   // 下边就是 breshman 的具体实现
-
+  //jc:参考论文来看
   const int64 dx = scaled_end.x() - scaled_begin.x();
   const int64 dy = scaled_end.y() - scaled_begin.y();
   const int64 denominator = 2 * subpixel_scale * dx;
@@ -86,7 +86,7 @@ std::vector<Eigen::Array2i> RayToPixelMask(const Eigen::Array2i& scaled_begin,  
 
   // The center of the subpixel part of 'scaled_begin.y()' assuming the
   // 'denominator', i.e., sub_y / denominator is in (0, 1).
-  int64 sub_y = (2 * (scaled_begin.y() % subpixel_scale) + 1) * dx;
+  int64 sub_y = (2 * (scaled_begin.y() % subpixel_scale) + 1) * dx;  //jc:像素都是以subpixel_scale为单元的整数，取余之后剩余多少决定在上个上面还是栅格下面
 
   // The distance from the from 'scaled_begin' to the right pixel border, to be
   // divided by 2 * 'subpixel_scale'.
@@ -99,8 +99,8 @@ std::vector<Eigen::Array2i> RayToPixelMask(const Eigen::Array2i& scaled_begin,  
   const int end_x = std::max(scaled_begin.x(), scaled_end.x()) / subpixel_scale;
 
   // Move from 'scaled_begin' to the next pixel border to the right.
-  // dy > 0 时的情况
-  sub_y += dy * first_pixel;
+  // dy > 0 时的情况 //jc: 因为保持起始点的x小于终止点的x，所以只考虑两种情况
+  sub_y += dy * first_pixel;  
   if (dy > 0) {
     while (true) {
       if (!isEqual(pixel_mask.back(), current)) pixel_mask.push_back(current);
@@ -111,14 +111,14 @@ std::vector<Eigen::Array2i> RayToPixelMask(const Eigen::Array2i& scaled_begin,  
       }
       ++current.x();
       if (sub_y == denominator) {
-        sub_y -= denominator;
+        sub_y -= denominator;  //jc: y坐标变换就 减去 2 * subpixel_scale * dx
         ++current.y();
       }
       if (current.x() == end_x) {
         break;
       }
       // Move from one pixel border to the next.
-      sub_y += dy * 2 * subpixel_scale;
+      sub_y += dy * 2 * subpixel_scale; //jc: dy * 2 * subpixel_scale
     }
     // Move from the pixel border on the right to 'scaled_end'.
     sub_y += dy * last_pixel;

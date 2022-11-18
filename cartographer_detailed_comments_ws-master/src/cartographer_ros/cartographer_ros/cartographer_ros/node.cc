@@ -150,7 +150,7 @@ Node::Node(
   // 发布SubmapList
   submap_list_publisher_ =
       node_handle_.advertise<::cartographer_ros_msgs::SubmapList>(
-          kSubmapListTopic, kLatestOnlyPublisherQueueSize);
+          kSubmapListTopic, kLatestOnlyPublisherQueueSize);  //jc:topic的名字在node_constants.h 中定义
   // 发布轨迹
   trajectory_node_list_publisher_ =
       node_handle_.advertise<::visualization_msgs::MarkerArray>(
@@ -284,7 +284,7 @@ void Node::PublishSubmapList(const ::ros::WallTimerEvent& unused_timer_event) {
 }
 
 /**
- * @brief 新增一个位姿估计器
+ * @brief 新增一个位姿估计器做一个前端的匹配之前的先验
  * 
  * @param[in] trajectory_id 轨迹id
  * @param[in] options 参数配置
@@ -314,7 +314,7 @@ void Node::AddExtrapolator(const int trajectory_id,
 
   // 以1ms, 以及重力常数10, 作为参数构造PoseExtrapolator
   extrapolators_.emplace(    //jc:定义在node.h 234行 map类型
-      std::piecewise_construct, 
+      std::piecewise_construct,  //jc:在于告诉编译器 下面的forward_as_tuple返回的不是tuple而是对应的变量
       std::forward_as_tuple(trajectory_id),
       std::forward_as_tuple(
           ::cartographer::common::FromSeconds(kExtrapolationEstimationTimeSec),
@@ -600,23 +600,23 @@ Node::ComputeExpectedSensorIds(const TrajectoryOptions& options) const {
  * @param[in] options 轨迹的参数配置
  * @return int 新生成的轨迹的id
  */
-int Node::AddTrajectory(const TrajectoryOptions& options) {
+int Node::AddTrajectory(const TrajectoryOptions& options) {  //logic:由本文件909或者897行调用
 
   const std::set<cartographer::mapping::TrajectoryBuilderInterface::SensorId>
-      expected_sensor_ids = ComputeExpectedSensorIds(options);
+      expected_sensor_ids = ComputeExpectedSensorIds(options); //jc:确定所有需要的topic的名字的集合
 
   // 调用map_builder_bridge的AddTrajectory 138行, 添加一个轨迹
   const int trajectory_id =
-      map_builder_bridge_.AddTrajectory(expected_sensor_ids, options);
+      map_builder_bridge_.AddTrajectory(expected_sensor_ids, options);  //logic:调用map_builder_bridge.cc 138 行
 
   // 新增一个位姿估计器
-  AddExtrapolator(trajectory_id, options); //jc:调用本文件292行
+  AddExtrapolator(trajectory_id, options); //logic:调用本文件292行
 
   // 新生成一个传感器数据采样器
-  AddSensorSamplers(trajectory_id, options); //jc:调用本文件330行
+  AddSensorSamplers(trajectory_id, options); //logic:调用本文件330行
 
   // 订阅话题与注册回调函数
-  LaunchSubscribers(options, trajectory_id);//jc:调用本文件641行
+  LaunchSubscribers(options, trajectory_id);//logic:调用本文件641行
 
   // 创建了一个3s执行一次的定时器,由于oneshot=true, 所以只执行一次
   // 检查设置的topic名字是否在ros中存在, 不存在则报错
@@ -638,7 +638,7 @@ int Node::AddTrajectory(const TrajectoryOptions& options) {
  * @param[in] options 配置参数
  * @param[in] trajectory_id 轨迹id  
  */
-void Node::LaunchSubscribers(const TrajectoryOptions& options,
+void Node::LaunchSubscribers(const TrajectoryOptions& options,   //logic:由本文件619行调用
                              const int trajectory_id) {
   // laser_scan 的订阅与注册回调函数, 多个laser_scan 的topic 共用同一个回调函数
   for (const std::string& topic :
@@ -1206,7 +1206,7 @@ void Node::HandleMultiEchoLaserScanMessage(
 }
 
 // 调用SensorBridge的传感器处理函数进行数据处理
-void Node::HandlePointCloud2Message(   //jc:node.cc 641行 LaunchSubscribers调用
+void Node::HandlePointCloud2Message(   //logic:node.cc 668行 LaunchSubscribers调用
     const int trajectory_id, const std::string& sensor_id,
     const sensor_msgs::PointCloud2::ConstPtr& msg) {
   absl::MutexLock lock(&mutex_);
@@ -1214,7 +1214,7 @@ void Node::HandlePointCloud2Message(   //jc:node.cc 641行 LaunchSubscribers调�
     return;
   }
   map_builder_bridge_.sensor_bridge(trajectory_id)
-      ->HandlePointCloud2Message(sensor_id, msg);  //jc:调用sensor_bridge.cc 208行
+      ->HandlePointCloud2Message(sensor_id, msg);  //logic:调用sensor_bridge.cc 208行
 }
 
 void Node::SerializeState(const std::string& filename,

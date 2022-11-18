@@ -45,17 +45,18 @@ ProbabilityGrid::ProbabilityGrid(const proto::Grid2D& proto,
 // Sets the probability of the cell at 'cell_index' to the given
 // 'probability'. Only allowed if the cell was unknown before.
 // 将 索引 处单元格的概率设置为给定的概率, 仅当单元格之前处于未知状态时才允许
-void ProbabilityGrid::SetProbability(const Eigen::Array2i& cell_index,
+void ProbabilityGrid::SetProbability(const Eigen::Array2i& cell_index,  //logic:由本文件130行调用
                                      const float probability) {
-  // 获取对应栅格的引用
+  // 获取对应栅格的引用 
+  //jc:这里获取引用之后， cell=后面的值会随着cell的值的变化而变化       
   uint16& cell =
-      (*mutable_correspondence_cost_cells())[ToFlatIndex(cell_index)];
+      (*mutable_correspondence_cost_cells())[ToFlatIndex(cell_index)]; //jc:mutable_correspondence_cost_cells()地图栅格值, 存储的是free的概率转成uint16后的[0, 32767]范围内的值, 0代表未知
   CHECK_EQ(cell, kUnknownProbabilityValue);
   // 为栅格赋值 value
   cell =
-      CorrespondenceCostToValue(ProbabilityToCorrespondenceCost(probability));
+      CorrespondenceCostToValue(ProbabilityToCorrespondenceCost(probability));  //jc:先将概率转换为free的概率再转换为1-32767
   // 更新bounding_box
-  mutable_known_cells_box()->extend(cell_index.matrix());
+  mutable_known_cells_box()->extend(cell_index.matrix()); //jc:更新一个2d的框
 }
 
 // Applies the 'odds' specified when calling ComputeLookupTableToApplyOdds()
@@ -70,21 +71,22 @@ void ProbabilityGrid::SetProbability(const Eigen::Array2i& cell_index,
 // 如果这是对指定单元格第一次调用 ApplyOdds(),则其值将设置为与 'odds' 对应的概率
 
 // 使用查找表对指定栅格进行栅格值的更新
-bool ProbabilityGrid::ApplyLookupTable(const Eigen::Array2i& cell_index,  //jc:主要通过这个函数对栅格值进行更新
+bool ProbabilityGrid::ApplyLookupTable(const Eigen::Array2i& cell_index,  //jc:由probability_grid_range_data_inserter_2d.cc 87行调用，主要通过这个函数对栅格值进行更新
     return false;
-                                       const std::vector<uint16>& table) {
+                                       const std::vector<uint16>& table) {  //jc:table为1维栅格地图
   DCHECK_EQ(table.size(), kUpdateMarker);
-  const int flat_index = ToFlatIndex(cell_index);
+  const int flat_index = ToFlatIndex(cell_index); //jc:二维转一维
   // 获取对应栅格的指针
   uint16* cell = &(*mutable_correspondence_cost_cells())[flat_index];
   // 对处于更新状态的栅格, 不再进行更新了
-  if (*cell >= kUpdateMarker) { //jc:同一个栅格在一针雷达数据不做多次更新，kUpdateMarker值在probabilit_values.cc 116行被加上
+  if (*cell >= kUpdateMarker) {                         //jc:同一个栅格在一针雷达数据不做多次更新，kUpdateMarker值在probabilit_values.cc 116行被加上
     return false;
   }
-  // 标记这个索引的栅格已经被更新过
-  mutable_update_indices()->push_back(flat_index);
-  // 更新栅格值
-  *cell = table[*cell];  //jc:table[*cell] =*cell * odds(0.55) 再转成value;只是table先将所有可能的值都计算好并存储下来了
+  // 标记这个索引的栅格已经被更新过                           
+  mutable_update_indices()->push_back(flat_index);      //jc:(*mutable_correspondence_cost_cells())  保存了栅格地图的概率，是一个数组
+                                                        //jc:假如table 为hit_table，则根据索引得到hit_table的参数并赋值给 *cell
+  // 更新栅格值                                             //jc:set 指针指向(*mutable_correspondence_cost_cells())[flat_index]的地址，*set值的改变引起(*mutable_correspondence_cost_cells())[flat_index]值改变
+  *cell = table[*cell];                                    //jc:实际上计算概率为*cell * odds(0.55)，但是table事先计算好了*cell * odds(0.55)，，所以只要传*cell即可。table根据实参确定是hit还是miss
   DCHECK_GE(*cell, kUpdateMarker);
   // 更新bounding_box
   mutable_known_cells_box()->extend(cell_index.matrix());
@@ -97,12 +99,12 @@ GridType ProbabilityGrid::GetGridType() const {
 
 // Returns the probability of the cell with 'cell_index'.
 // 获取 索引 处单元格的占用概率
-float ProbabilityGrid::GetProbability(const Eigen::Array2i& cell_index) const {
+float ProbabilityGrid::GetProbability(const Eigen::Array2i& cell_index) const {  //logic:本文件130行调用
   if (!limits().Contains(cell_index)) return kMinProbability;
-  return CorrespondenceCostToProbability(ValueToCorrespondenceCost(
-      correspondence_cost_cells()[ToFlatIndex(cell_index)]));
-}
-
+  return CorrespondenceCostToProbability(ValueToCorrespondenceCost(    //jc:存的是free的概率，所以取的时候要CorrespondenceCostToProbability才是占用的概率
+      correspondence_cost_cells()[ToFlatIndex(cell_index)]));       //jc: correspondence_cost_cells()返回地图栅格值, 存储的是free的概率转成uint16后的[0, 32767]范围内的值, 0代表未知
+}                                                                      //logic:调用grid_2d.h 77行 ,correspondence_cost_cells_ 返回值与  mutable_correspondence_cost_cells()一样，一个可更改一个不可更改  
+         
 proto::Grid2D ProbabilityGrid::ToProto() const {
   proto::Grid2D result;
   result = Grid2D::ToProto();
@@ -111,7 +113,7 @@ proto::Grid2D ProbabilityGrid::ToProto() const {
 }
 
 // 根据bounding_box对栅格地图进行裁剪到正好包含点云
-std::unique_ptr<Grid2D> ProbabilityGrid::ComputeCroppedGrid() const {
+std::unique_ptr<Grid2D> ProbabilityGrid::ComputeCroppedGrid() const {  //logic:由submap_2d.cc 174行 Finish()调用
   Eigen::Array2i offset;
   CellLimits cell_limits;
   // 根据bounding_box对栅格地图进行裁剪
@@ -127,15 +129,16 @@ std::unique_ptr<Grid2D> ProbabilityGrid::ComputeCroppedGrid() const {
   // 给新栅格地图赋值
   for (const Eigen::Array2i& xy_index : XYIndexRangeIterator(cell_limits)) {
     if (!IsKnown(xy_index + offset)) continue;
-    cropped_grid->SetProbability(xy_index, GetProbability(xy_index + offset));  //jc:SetProbability只对新的地图进行更新
-  }
+    cropped_grid->SetProbability(xy_index, GetProbability(xy_index + offset));  //jc:SetProbability只对未知的地图进行更新，ApplyLookupTable可以对指定栅格值进行更新
+  }                                                                            //jc:一个是获取xy_index这个位置的值，一个是获取xy_index + offset位置的值
+                                                                               //jc:裁剪前xy_index + offset位置有值，xy_index没值才可以更新
 
   // 返回新地图的指针
   return std::unique_ptr<Grid2D>(cropped_grid.release());
 }
 
 // 获取压缩后的地图栅格数据
-bool ProbabilityGrid::DrawToSubmapTexture(      
+bool ProbabilityGrid::DrawToSubmapTexture(      //logic:由 submap_2d.cc 154 行调用
     proto::SubmapQuery::Response::SubmapTexture* const texture,
     transform::Rigid3d local_pose) const {
   Eigen::Array2i offset;

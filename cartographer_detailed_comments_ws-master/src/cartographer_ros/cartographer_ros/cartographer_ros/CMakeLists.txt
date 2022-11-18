@@ -26,7 +26,7 @@ install(TARGETS cartographer_assets_writer
 )
 
 # 生成建图节点
-google_binary(cartographer_node
+google_binary(cartographer_node        #jc:生成可执行文件cartographer_node
   SRCS
     node_main.cc
 )

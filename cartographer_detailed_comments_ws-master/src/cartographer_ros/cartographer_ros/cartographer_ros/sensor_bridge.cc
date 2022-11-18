@@ -205,7 +205,7 @@ void SensorBridge::HandleMultiEchoLaserScanMessage(
 }
 
 // 处理ros格式的PointCloud2, 先转成点云,再传入trajectory_builder_
-void SensorBridge::HandlePointCloud2Message(//jc:HandlePointCloud2Message 1209行HandlePointCloud2Message调用
+void SensorBridge::HandlePointCloud2Message(//logic: node.cc 1217行HandlePointCloud2Message调用
     const std::string& sensor_id,
     const sensor_msgs::PointCloud2::ConstPtr& msg) {
   carto::sensor::PointCloudWithIntensities point_cloud;
@@ -217,7 +217,7 @@ void SensorBridge::HandlePointCloud2Message(//jc:HandlePointCloud2Message 1209�
 const TfBridge& SensorBridge::tf_bridge() const { return tf_bridge_; }
 
 // 根据参数配置,将一帧雷达数据分成几段, 再传入trajectory_builder_
-void SensorBridge::HandleLaserScan( //jc:本文件 208行HandlePointCloud2Message调用
+void SensorBridge::HandleLaserScan( //logic:本文件 214行HandlePointCloud2Message调用
     const std::string& sensor_id, const carto::common::Time time,
     const std::string& frame_id,
     const carto::sensor::PointCloudWithIntensities& points) {
@@ -281,7 +281,7 @@ void SensorBridge::HandleLaserScan( //jc:本文件 208行HandlePointCloud2Messag
  * @param[in] frame_id 点云的frame
  * @param[in] ranges 雷达坐标系下的TimedPointCloud格式的点云
  */
-void SensorBridge::HandleRangefinder(   //jc:本文件 220行HandleLaserScan调用
+void SensorBridge::HandleRangefinder(   //logic:本文件 269 行HandleLaserScan调用
     const std::string& sensor_id, const carto::common::Time time,
     const std::string& frame_id, const carto::sensor::TimedPointCloud& ranges) {
   if (!ranges.empty()) {
@@ -293,7 +293,7 @@ void SensorBridge::HandleRangefinder(   //jc:本文件 220行HandleLaserScan调�
   // 以 tracking 到 sensor_frame 的坐标变换为TimedPointCloudData 的 origin
   // 将点云的坐标转成 tracking 坐标系下的坐标, 再传入trajectory_builder_
   if (sensor_to_tracking != nullptr) {
-    trajectory_builder_->AddSensorData(  //jc: 调用 global_trajectory_builder.cc 74行
+    trajectory_builder_->AddSensorData(  //logic: 调用 global_trajectory_builder.cc 74行
         sensor_id, carto::sensor::TimedPointCloudData{
                        time, 
                        sensor_to_tracking->translation().cast<float>(),

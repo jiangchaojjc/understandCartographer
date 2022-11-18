@@ -25,7 +25,7 @@ namespace mapping {
 namespace scan_matching {
 
 // 构造函数
-SearchParameters::SearchParameters(const double linear_search_window,
+SearchParameters::SearchParameters(const double linear_search_window,   //logic:  由real_time_correlative_scan_matcher_2d.cc 151行 调用
                                    const double angular_search_window,
                                    const sensor::PointCloud& point_cloud,
                                    const double resolution)
@@ -143,7 +143,7 @@ void test_ShrinkToFit()
 */
 
 // 生成按照不同角度旋转后的点云集合
-std::vector<sensor::PointCloud> GenerateRotatedScans(
+std::vector<sensor::PointCloud> GenerateRotatedScans(  //logic:  由real_time_correlative_scan_matcher_2d.cc 157行 调用
     const sensor::PointCloud& point_cloud,
     const SearchParameters& search_parameters) {
   std::vector<sensor::PointCloud> rotated_scans;

@@ -34,7 +34,7 @@ namespace common {
 ConfigurationFileResolver::ConfigurationFileResolver(
     const std::vector<std::string>& configuration_files_directories)
     : configuration_files_directories_(configuration_files_directories) {
-  configuration_files_directories_.push_back(kConfigurationFilesDirectory);
+  configuration_files_directories_.push_back(kConfigurationFilesDirectory); //logic:调用build下面的common下的config.h 25行
 }
 
 /**
@@ -45,7 +45,7 @@ ConfigurationFileResolver::ConfigurationFileResolver(
  */
 std::string ConfigurationFileResolver::GetFullPathOrDie(
     const std::string& basename) {
-  for (const auto& path : configuration_files_directories_) {
+  for (const auto& path : configuration_files_directories_) { //jc:现在这里由两个文件夹，一个是自己起的launch文件中设置的文件；一个是构造时确定的文件夹
     const std::string filename = path + "/" + basename;
     std::ifstream stream(filename.c_str());
     // 只要找到就退出
@@ -64,7 +64,7 @@ std::string ConfigurationFileResolver::GetFullPathOrDie(
  * @param[in] basename 文件名
  * @return std::string 文件内容的数据流
  */
-std::string ConfigurationFileResolver::GetFileContentOrDie(
+std::string ConfigurationFileResolver::GetFileContentOrDie(  //logic:由 node_option.cc 85行调用
     const std::string& basename) {
   CHECK(!basename.empty()) << "File basename cannot be empty." << basename;
 

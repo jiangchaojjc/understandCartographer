@@ -70,7 +70,7 @@ class GlobalTrajectoryBuilder : public mapping::TrajectoryBuilderInterface {
    * @param[in] sensor_id topic名字
    * @param[in] timed_point_cloud_data 点云数据
    */
-  void AddSensorData(           //jc: sensor_bridge.cc 284行 HandleRangefinder调用
+  void AddSensorData(           //logic: sensor_bridge.cc 296行 HandleRangefinder调用
       const std::string& sensor_id,
       const sensor::TimedPointCloudData& timed_point_cloud_data) override {
     CHECK(local_trajectory_builder_)
@@ -78,7 +78,7 @@ class GlobalTrajectoryBuilder : public mapping::TrajectoryBuilderInterface {
 
     // 进行扫描匹配, 返回匹配后的结果
     std::unique_ptr<typename LocalTrajectoryBuilder::MatchingResult>
-        matching_result = local_trajectory_builder_->AddRangeData(  //jc:调用local_trajectory_builder_2d.cc 140行
+        matching_result = local_trajectory_builder_->AddRangeData(  //logic:调用local_trajectory_builder_2d.cc 140行
             sensor_id, timed_point_cloud_data);
 
     if (matching_result == nullptr) {
@@ -94,7 +94,7 @@ class GlobalTrajectoryBuilder : public mapping::TrajectoryBuilderInterface {
       kLocalSlamInsertionResults->Increment();
 
       // 将匹配后的结果 当做节点 加入到位姿图中
-      auto node_id = pose_graph_->AddNode( //jc:调用pose_graph_2d.cc 226行addNode
+      auto node_id = pose_graph_->AddNode( //logic:调用pose_graph_2d.cc 226行addNode 进行后端优化
           matching_result->insertion_result->constant_data, trajectory_id_,//jc:insertion_result在local_trajectroy_builder_2d.h里48行定义
           matching_result->insertion_result->insertion_submaps);
           
@@ -123,7 +123,7 @@ class GlobalTrajectoryBuilder : public mapping::TrajectoryBuilderInterface {
   void AddSensorData(const std::string& sensor_id, 
                      const sensor::ImuData& imu_data) override {
     if (local_trajectory_builder_) {
-      local_trajectory_builder_->AddImuData(imu_data);
+      local_trajectory_builder_->AddImuData(imu_data); //logic:调用local_trajectory_builder_2d.cc 415行
     }
     pose_graph_->AddImuData(trajectory_id_, imu_data);  //jc:调用pose_graph_2d.cc304行
   }

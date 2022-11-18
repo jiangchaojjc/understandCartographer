@@ -124,7 +124,7 @@ MapBuilder::MapBuilder(const proto::MapBuilderOptions& options) //jc:在这里�
  *        实际上是map_builder_bridge.cc 中的 OnLocalSlamResult() 函数
  * @return int 新生成的轨迹的id
  */
-int MapBuilder::AddTrajectoryBuilder(
+int MapBuilder::AddTrajectoryBuilder(  //logic:由map_builder_bridge.cc 143行调用
     const std::set<SensorId>& expected_sensor_ids,
     const proto::TrajectoryBuilderOptions& trajectory_options,
     LocalSlamResultCallback local_slam_result_callback) {
@@ -191,7 +191,7 @@ int MapBuilder::AddTrajectoryBuilder(
     std::unique_ptr<LocalTrajectoryBuilder2D> local_trajectory_builder;
     if (trajectory_options.has_trajectory_builder_2d_options()) {
       // local_trajectory_builder(前端)的初始化
-      local_trajectory_builder = absl::make_unique<LocalTrajectoryBuilder2D>(
+      local_trajectory_builder = absl::make_unique<LocalTrajectoryBuilder2D>(  //logic:调用local_trajectory_builder_2d.cc 44行
           trajectory_options.trajectory_builder_2d_options(),
           SelectRangeSensorIds(expected_sensor_ids));
     }

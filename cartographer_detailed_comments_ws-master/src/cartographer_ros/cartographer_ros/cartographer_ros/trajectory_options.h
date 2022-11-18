@@ -32,8 +32,8 @@ struct TrajectoryOptions {
   std::string tracking_frame;   //jc:跟踪的坐标系。在没有imu的情况下，tracking_frame = base_link
   std::string published_frame;  //jc:发布pose的坐标系，在没有imu的情况下，published_frame = odom
   std::string odom_frame;
-  bool provide_odom_frame;
-  bool use_odometry;
+  bool provide_odom_frame;         //jc:这些参数都是根据revo_lds.lua文件中定义的字段定义。由node_option.cc93行调用，由trajectory_option.cc 47行的函数读取
+  bool use_odometry;                //jc:可以在revo_ld.lua中添加字段，并在此定义，通过trajectory_option.cc 47行的函数读取
   bool use_nav_sat;
   bool use_landmarks;
   bool publish_frame_projected_to_2d;

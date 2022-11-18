@@ -240,7 +240,7 @@ uint8 PrecomputationGrid2D::ComputeCellValue(const float probability) const {
 }
 
 // 构造多分辨率地图
-PrecomputationGridStack2D::PrecomputationGridStack2D(
+PrecomputationGridStack2D::PrecomputationGridStack2D(      
     const Grid2D& grid,
     const proto::FastCorrelativeScanMatcherOptions2D& options) {
   CHECK_GE(options.branch_and_bound_depth(), 1);
@@ -270,7 +270,7 @@ PrecomputationGridStack2D::PrecomputationGridStack2D(
 /************** FastCorrelativeScanMatcher2D **************/
 
 // 构造函数
-FastCorrelativeScanMatcher2D::FastCorrelativeScanMatcher2D(
+FastCorrelativeScanMatcher2D::FastCorrelativeScanMatcher2D(      //logic:由constraint_builder_2d.cc 246行调用
     const Grid2D& grid,
     const proto::FastCorrelativeScanMatcherOptions2D& options)
     : options_(options),
@@ -291,7 +291,7 @@ FastCorrelativeScanMatcher2D::~FastCorrelativeScanMatcher2D() {}
  * @param[out] pose_estimate 匹配后得到的位姿
  * @return true 匹配成功, 反之匹配失败
  */
-bool FastCorrelativeScanMatcher2D::Match(
+bool FastCorrelativeScanMatcher2D::Match(                 //logic:由constraint_builder_2d.cc 318 行调用
     const transform::Rigid2d& initial_pose_estimate,
     const sensor::PointCloud& point_cloud, const float min_score, float* score,
     transform::Rigid2d* pose_estimate) const {
@@ -333,7 +333,7 @@ bool FastCorrelativeScanMatcher2D::MatchFullSubmap(
 }
 
 // 进行基于分支定界算法的粗匹配
-bool FastCorrelativeScanMatcher2D::MatchWithSearchParameters(
+bool FastCorrelativeScanMatcher2D::MatchWithSearchParameters(         //logic:由本文件302行调用
     SearchParameters search_parameters,
     const transform::Rigid2d& initial_pose_estimate,
     const sensor::PointCloud& point_cloud, float min_score, float* score,
@@ -366,7 +366,7 @@ bool FastCorrelativeScanMatcher2D::MatchWithSearchParameters(
   // 对于地图坐标系来说 最低分辨率=1<<h, h表示搜索树的总的层数
   // 这里不但对最低分辨率的所有候选解的得分进行了计算, 同时还按照从大到小排列
   const std::vector<Candidate2D> lowest_resolution_candidates =
-      ComputeLowestResolutionCandidates(discrete_scans, search_parameters);
+      ComputeLowestResolutionCandidates(discrete_scans, search_parameters);        //logic:调用本文件397 行
   
   // Step: 进行基于分支定界算法的搜索, 获取最优解
   const Candidate2D best_candidate = BranchAndBound(
@@ -394,7 +394,7 @@ FastCorrelativeScanMatcher2D::ComputeLowestResolutionCandidates(
 
   // 生成最低分辨率层(栅格最粗)上的所有候选解
   std::vector<Candidate2D> lowest_resolution_candidates =
-      GenerateLowestResolutionCandidates(search_parameters);
+      GenerateLowestResolutionCandidates(search_parameters);              //logic:调用本文件408 行
 
   // 计算每个候选解的得分, 按照匹配得分从大到小排序, 返回排列好的candidates 
   ScoreCandidates(
@@ -406,7 +406,7 @@ FastCorrelativeScanMatcher2D::ComputeLowestResolutionCandidates(
 // 生成最低分辨率层(栅格最粗)上的所有候选解
 std::vector<Candidate2D>
 FastCorrelativeScanMatcher2D::GenerateLowestResolutionCandidates(  
-    const SearchParameters& search_parameters) const {
+    const SearchParameters& search_parameters) const {                          //jc:产生候选解的计算方式
   const int linear_step_size = 1 << precomputation_grid_stack_->max_depth(); //jc:最粗的分辨率的每个格子的size
   int num_candidates = 0;
   // 遍历旋转后的每个点云

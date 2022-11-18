@@ -140,7 +140,7 @@ int MapBuilderBridge::AddTrajectory(
         expected_sensor_ids,
     const TrajectoryOptions& trajectory_options) {
   // Step: 1 开始一条新的轨迹, 返回新轨迹的id,需要传入一个函数
-  const int trajectory_id = map_builder_->AddTrajectoryBuilder(
+  const int trajectory_id = map_builder_->AddTrajectoryBuilder(  //logic:调用map_builder.cc 127行
       expected_sensor_ids, trajectory_options.trajectory_builder_options,
       // lambda表达式 local_slam_result_callback_
       [this](const int trajectory_id, 

@@ -82,13 +82,13 @@ float ComputeCandidateScore(const ProbabilityGrid& probability_grid,
 
 }  // namespace
 
-RealTimeCorrelativeScanMatcher2D::RealTimeCorrelativeScanMatcher2D(
+RealTimeCorrelativeScanMatcher2D::RealTimeCorrelativeScanMatcher2D(  //logic:由本文件167 行调用
     const proto::RealTimeCorrelativeScanMatcherOptions& options)
     : options_(options) {}
 
 // 生成所有的候选解
 std::vector<Candidate2D>
-RealTimeCorrelativeScanMatcher2D::GenerateExhaustiveSearchCandidates(
+RealTimeCorrelativeScanMatcher2D::GenerateExhaustiveSearchCandidates(  //logic:由本文件167行调用
     const SearchParameters& search_parameters) const {
   int num_candidates = 0;
   // 计算候选解的个数 //jc:平移数*旋转数 = 总共多少组解
@@ -148,16 +148,16 @@ double RealTimeCorrelativeScanMatcher2D::Match(
           initial_rotation.cast<float>().angle(), Eigen::Vector3f::UnitZ())));
 
   // 根据配置参数初始化 SearchParameters
-  const SearchParameters search_parameters(  //jc:correlative_scan_matcher_2d.h 35行
+  const SearchParameters search_parameters(  //logic:correlative_scan_matcher_2d.cc 28行
       options_.linear_search_window(), options_.angular_search_window(), //jc:这里的参数是trejectory_grid_2d.lua中的参数
       rotated_point_cloud, grid.limits().resolution());   //
 
   // Step: 2 生成按照不同角度旋转后的点云集合
   const std::vector<sensor::PointCloud> rotated_scans =    //jc:PointCloud里保存了一帧点云的集合
-      GenerateRotatedScans(rotated_point_cloud, search_parameters);
+      GenerateRotatedScans(rotated_point_cloud, search_parameters); //logic:correlative_scan_matcher_2d.cc 146行
   
   // Step: 3 将旋转后的点云集合按照预测出的平移量进行平移, 获取平移后的点在地图中的索引
-  const std::vector<DiscreteScan2D> discrete_scans = DiscretizeScans(   //jc:获取所有可能的旋转平移之后的点的索引
+  const std::vector<DiscreteScan2D> discrete_scans = DiscretizeScans(   //jc:获取所有可能的旋转平移之后的点的索引//logic:correlative_scan_matcher_2d.cc 168行
       grid.limits(), rotated_scans,
       Eigen::Translation2f(initial_pose_estimate.translation().x(),
                            initial_pose_estimate.translation().y()));
@@ -182,7 +182,7 @@ double RealTimeCorrelativeScanMatcher2D::Match(
 }
 
 // 计算所有候选解的加权得分
-void RealTimeCorrelativeScanMatcher2D::ScoreCandidates(
+void RealTimeCorrelativeScanMatcher2D::ScoreCandidates(            //logic:由本文件 170 行调用
     const Grid2D& grid, const std::vector<DiscreteScan2D>& discrete_scans,
     const SearchParameters& search_parameters,
     std::vector<Candidate2D>* const candidates) const {

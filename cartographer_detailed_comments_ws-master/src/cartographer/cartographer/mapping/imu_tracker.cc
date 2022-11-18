@@ -47,7 +47,7 @@ ImuTracker::ImuTracker(const double imu_gravity_time_constant,
  * 
  * @param[in] time 要预测的时刻
  */
-void ImuTracker::Advance(const common::Time time) {
+void ImuTracker::Advance(const common::Time time) {   //logic:由pose_extrapolator.cc275行调用
   CHECK_LE(time_, time);
   const double delta_t = common::ToSeconds(time - time_);
   // 上一时刻的角速度乘以时间,得到当前时刻相对于上一时刻的预测的姿态变化量,再转换成四元数

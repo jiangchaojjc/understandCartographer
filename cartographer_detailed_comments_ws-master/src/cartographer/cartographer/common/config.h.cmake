@@ -20,7 +20,7 @@
 namespace cartographer {
 namespace common {
 
-constexpr char kConfigurationFilesDirectory[] =
+constexpr char kConfigurationFilesDirectory[] =                 #jc：在build文件夹common文件夹下生成config.h文件  该字段在CMakeLists.txt文件中定义74行
     "@CARTOGRAPHER_CONFIGURATION_FILES_DIRECTORY@";
 constexpr char kSourceDirectory[] = "@PROJECT_SOURCE_DIR@";
 

@@ -44,7 +44,7 @@ void CheckTrajectoryOptions(const TrajectoryOptions& options) {
  * @param[in] lua_parameter_dictionary lua字典
  * @return TrajectoryOptions 
  */  
-TrajectoryOptions CreateTrajectoryOptions(   //jc:返回给node_optionc.cc 下的LoadOptions
+TrajectoryOptions CreateTrajectoryOptions(   //jc:返回给node_optionc.cc 下的LoadOptions ，由Node_option.cc 93行调用
     ::cartographer::common::LuaParameterDictionary* const
         lua_parameter_dictionary) {
   TrajectoryOptions options;

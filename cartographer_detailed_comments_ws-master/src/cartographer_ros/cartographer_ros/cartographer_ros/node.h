@@ -223,7 +223,7 @@ class Node {
     ::cartographer::common::FixedRatioSampler odometry_sampler;
     ::cartographer::common::FixedRatioSampler fixed_frame_pose_sampler;
     ::cartographer::common::FixedRatioSampler imu_sampler;
-    ::cartographer::common::FixedRatioSampler landmark_sampler;
+    ::cartographer::common::FixedRatioSampler landmark_sampler;  //jc:全局命名空间，直接从全局搜索，不然先从当前命名空间开始搜索
   };
 
   // c++11: std::unordered_map 是采用哈希数据结构实现的, 内部数据保存是无序的

@@ -212,7 +212,7 @@ void OptimizationProblem2D::AddFixedFramePoseData(
 }
 
 // 向优化问题中加入节点位姿数据
-void OptimizationProblem2D::AddTrajectoryNode(const int trajectory_id,
+void OptimizationProblem2D::AddTrajectoryNode(const int trajectory_id,                  //logic:由pose_graph.cc 482 行
                                               const NodeSpec2D& node_data) {
   node_data_.Append(trajectory_id, node_data);
   trajectory_data_[trajectory_id];
