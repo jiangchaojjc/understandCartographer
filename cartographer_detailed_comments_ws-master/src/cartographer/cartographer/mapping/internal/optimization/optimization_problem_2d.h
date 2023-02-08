@@ -126,7 +126,7 @@ class OptimizationProblem2D
 
   optimization::proto::OptimizationProblemOptions options_; // 参数配置
   
-  // 优化的目标就是节点的位姿与子图的位姿
+  // 优化的目标就是节点的位姿与子图的位姿                          //jc:NodeId节点的id,NodeSpec2D节点的位姿
   MapById<NodeId, NodeSpec2D> node_data_;                   // 节点坐标列表
   MapById<SubmapId, SubmapSpec2D> submap_data_;             // submap原点坐标列表
   

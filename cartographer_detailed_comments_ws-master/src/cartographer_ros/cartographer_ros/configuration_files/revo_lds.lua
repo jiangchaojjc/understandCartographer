@@ -16,25 +16,25 @@ include "map_builder.lua"
 include "trajectory_builder.lua"
 
 options = {
-  map_builder = MAP_BUILDER,
-  trajectory_builder = TRAJECTORY_BUILDER,
+  map_builder = MAP_BUILDER,  
+  trajectory_builder = TRAJECTORY_BUILDER,   
   map_frame = "map",
   tracking_frame = "horizontal_laser_link",   //jc:跟踪的坐标系，可以是imu,小车，雷达
   published_frame = "horizontal_laser_link",   //jc:cartographer正在发布pose的坐标系
   odom_frame = "odom",
-  provide_odom_frame = true,
-  publish_frame_projected_to_2d = false,
-  use_pose_extrapolator = true,
-  use_odometry = false,
-  use_nav_sat = false,
+  provide_odom_frame = true,                           //cartographer是否发布里程计坐标
+  publish_frame_projected_to_2d = false,               //是否无滚动、俯仰或z偏移
+  use_pose_extrapolator = true,                          //姿态发布
+  use_odometry = false,                               
+  use_nav_sat = false,                              //订阅GPS
   use_landmarks = false,
-  num_laser_scans = 1,
-  num_multi_echo_laser_scans = 0,
-  num_subdivisions_per_laser_scan = 1,
-  num_point_clouds = 0,
-  lookup_transform_timeout_sec = 0.2,
-  submap_publish_period_sec = 0.3,
-  pose_publish_period_sec = 5e-3,
+  num_laser_scans = 1,                           //订阅雷达格式以及数据，如果num_laser_scans大于1，则多个编号的扫描主题
+  num_multi_echo_laser_scans = 0,                //如果num_multi_echo_laser_scans大于1，则多个编号的回声主题
+  num_subdivisions_per_laser_scan = 1,              
+  num_point_clouds = 0,                            //num_point_clouds 多线雷达的数量
+  lookup_transform_timeout_sec = 0.2,                  
+  submap_publish_period_sec = 0.3,                          //子图发布频率
+  pose_publish_period_sec = 5e-3,                            //姿态发布频率 5* 10-3 = 200
   trajectory_publish_period_sec = 30e-3,
   rangefinder_sampling_ratio = 1.,    //jc:雷达的采样频率，设为1：有一帧数据就使用一次；设为2：有2帧数据使用一次，设为n：有n帧数据使用一次
   odometry_sampling_ratio = 1.,      //jc:里程计的采样频率，设为1：有一帧数据就使用一次；设为2：有2帧数据使用一次，设为n：有n帧数据使用一次
@@ -50,7 +50,7 @@ TRAJECTORY_BUILDER_2D.min_range = 0.3
 TRAJECTORY_BUILDER_2D.max_range = 8.
 TRAJECTORY_BUILDER_2D.missing_data_ray_length = 1.
 TRAJECTORY_BUILDER_2D.use_imu_data = false
-TRAJECTORY_BUILDER_2D.use_online_correlative_scan_matching = true
+TRAJECTORY_BUILDER_2D.use_online_correlative_scan_matching = true          //use_online_correlative_scan_matching = true  是否使用 实时的闭环检测方法 来进行前端的扫描匹配
 TRAJECTORY_BUILDER_2D.real_time_correlative_scan_matcher.linear_search_window = 0.1
 TRAJECTORY_BUILDER_2D.real_time_correlative_scan_matcher.translation_delta_cost_weight = 10.
 TRAJECTORY_BUILDER_2D.real_time_correlative_scan_matcher.rotation_delta_cost_weight = 1e-1

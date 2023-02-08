@@ -203,7 +203,7 @@ int MapBuilder::AddTrajectoryBuilder(  //logic:由map_builder_bridge.cc 143行�
         trajectory_options, sensor_collator_.get(), trajectory_id,
         expected_sensor_ids,
         // 将2D前端与2D位姿图打包在一起, 传入CollatedTrajectoryBuilder
-        CreateGlobalTrajectoryBuilder2D(
+        CreateGlobalTrajectoryBuilder2D(                                     //logic:调用global_trajectory_builder.cc 188 行
             std::move(local_trajectory_builder), trajectory_id,
             static_cast<PoseGraph2D*>(pose_graph_.get()),
             local_slam_result_callback, pose_graph_odometry_motion_filter)));

@@ -91,28 +91,28 @@ transform::Rigid2d ToPose(const std::array<double, 3>& values) {
 // Selects a trajectory node closest in time to the landmark observation and
 // applies a relative transform from it.
 // 根据landmark数据的时间对2个节点位姿进行插值, 得到这个时刻的global坐标系下的位姿
-transform::Rigid3d GetInitialLandmarkPose(
+transform::Rigid3d GetInitialLandmarkPose(                                                 //logic:由本文件155行调用
     const LandmarkNode::LandmarkObservation& observation,
     const NodeSpec2D& prev_node, const NodeSpec2D& next_node,
     const std::array<double, 3>& prev_node_pose,
     const std::array<double, 3>& next_node_pose) {
   const double interpolation_parameter =
-      common::ToSeconds(observation.time - prev_node.time) /
+      common::ToSeconds(observation.time - prev_node.time) /                                //jc:(x-x1)/(x2-x1)
       common::ToSeconds(next_node.time - prev_node.time);
   // 根据landmark数据的时间对2个节点位姿进行插值, 得到这个时刻的tracking_frame在global坐标系下的位姿
-  const std::tuple<std::array<double, 4>, std::array<double, 3>>
+  const std::tuple<std::array<double, 4>, std::array<double, 3>>                             //jc:std::array<double, 4>代表四元素姿态，std::array<double, 3>>代表平移
       rotation_and_translation =
           InterpolateNodes2D(prev_node_pose.data(), prev_node.gravity_alignment,
                              next_node_pose.data(), next_node.gravity_alignment,
                              interpolation_parameter);
   // 将landmark的数据从tracking_frame下的位姿转到global坐标系下
-  return transform::Rigid3d::FromArrays(std::get<0>(rotation_and_translation),
+  return transform::Rigid3d::FromArrays(std::get<0>(rotation_and_translation),                //jc:将位姿转成Rigid3再转到global坐标系下
                                         std::get<1>(rotation_and_translation)) *
          observation.landmark_to_tracking_transform;
 }
 
 // landmark数据 与 通过2个节点位姿插值出来的相对位姿 的差值作为残差项
-void AddLandmarkCostFunctions(
+void AddLandmarkCostFunctions(                                                           //jc:landmark_nodes是什么，怎么来的？见ceres_pose.cc 39行AddParameterBlock
     const std::map<std::string, LandmarkNode>& landmark_nodes,
     const MapById<NodeId, NodeSpec2D>& node_data,
     MapById<NodeId, std::array<double, 3>>* C_nodes,
@@ -149,17 +149,17 @@ void AddLandmarkCostFunctions(
       if (!C_landmarks->count(landmark_id)) {
         // 如果有优化后的位姿就用优化后的位姿, 没有就根据时间插值算出来一个位姿
         // starting_point就是这帧landmark数据对应的tracking_frame在global坐标系下的位姿
-        const transform::Rigid3d starting_point =
-            landmark_node.second.global_landmark_pose.has_value()
+        const transform::Rigid3d starting_point =                                 //jc:直到landmark_node.second.global_landmark_pose有值了（第一次优化完之后会给一个值），计算出来的残差才不一样
+            landmark_node.second.global_landmark_pose.has_value()                //jc:优化之后的位姿
                 ? landmark_node.second.global_landmark_pose.value()
-                : GetInitialLandmarkPose(observation, prev->data, next->data,
+                : GetInitialLandmarkPose(observation, prev->data, next->data,    //jc:通过插值得到landmark在global坐标系下的位姿，为start
                                          *prev_node_pose, *next_node_pose);
         // 将landmark数据放入C_landmarks
         C_landmarks->emplace(
             landmark_id,
             // 将landmark数据对应的节点的平移与旋转作为优化变量加入到problem中
             CeresPose(starting_point, 
-                      nullptr /* translation_parametrization */,
+                      nullptr /* translation_parametrization */,                           //jc:平移定义为空，旋转定义为QuaternionParameterization
                       absl::make_unique<ceres::QuaternionParameterization>(),
                       problem));
         // Set landmark constant if it is frozen.
@@ -171,14 +171,14 @@ void AddLandmarkCostFunctions(
         }
       }
       // Step: 第二种残差 landmark数据与节点位姿间的相对坐标变换 与 landmark观测 的差值作为残差项
-      problem->AddResidualBlock(
+      problem->AddResidualBlock(                                                //jc:先用插值starting_point再计算残差为end
           LandmarkCostFunction2D::CreateAutoDiffCostFunction(
               observation, prev->data, next->data),
           new ceres::HuberLoss(huber_scale), 
           prev_node_pose->data(),
           next_node_pose->data(), 
-          C_landmarks->at(landmark_id).rotation(),
-          C_landmarks->at(landmark_id).translation());
+          C_landmarks->at(landmark_id).rotation(),                             //jc:C_landmarks就是152行starting_point
+          C_landmarks->at(landmark_id).translation());                           
     }
   }
 }
@@ -343,21 +343,21 @@ void OptimizationProblem2D::Solve(
   // Step: 第一种残差 将节点与子图原点在global坐标系下的相对位姿 与 约束 的差值作为残差项
   // Add cost functions for intra- and inter-submap constraints.
   for (const Constraint& constraint : constraints) {//jc:子图间约束是通过暴力匹配和seres匹配之后，即回环之后的约束，所以主要依靠子图间约束
-    problem.AddResidualBlock(
+    problem.AddResidualBlock(                          //jc:调用ceres的AddResidualBlock
         // 根据SPA论文中的公式计算出的残差的CostFunction
-        CreateAutoDiffSpaCostFunction(constraint.pose), //jc:计算第二个约束
+        CreateAutoDiffSpaCostFunction(constraint.pose), //jc:计算第二个约束调用spa_cost_function_2d.cc 142 行
         // Loop closure constraints should have a loss function.
         // 为闭环约束提供一个Huber的核函数,用于降低错误的闭环检测对最终的优化结果带来的负面影响
         constraint.tag == Constraint::INTER_SUBMAP // 核函数
             ? new ceres::HuberLoss(options_.huber_scale()) // param: huber_scale//jc:子图间约束就添加HuberLoss
             : nullptr,
         C_submaps.at(constraint.submap_id).data(), // 2个优化变量 //jc:优化之后这两个数据就会改变（所以是原始数据），这两个数据本身存在约束
-        C_nodes.at(constraint.node_id).data());
+        C_nodes.at(constraint.node_id).data());       //jc:根据这两个数据算出一种约束，节点与子图原点在global坐标系下的坐标变换，C_nodes，C_submaps传到了spa_cost_function_2d.cc的operator()重载函数里
   }
   
   // Add cost functions for landmarks.
-  // Step: landmark数据 与 通过2个节点位姿插值出来的相对位姿 的差值作为残差项
-  AddLandmarkCostFunctions(landmark_nodes, node_data_, &C_nodes, &C_landmarks,
+  // Step: landmark数据 与 通过2个节点位姿插值出来的相对位姿 的差值作为残差项  Step: 第二种残差 landmark数据与节点位姿间的相对坐标变换 与 landmark观测 的差值作为残差项
+  AddLandmarkCostFunctions(landmark_nodes, node_data_, &C_nodes, &C_landmarks,             //jc:landmark_nodes是什么，怎么来的？
                            &problem, options_.huber_scale());
   
   // Add penalties for violating odometry or changes between consecutive nodes
@@ -369,7 +369,7 @@ void OptimizationProblem2D::Solve(
     // 获取每个节点的轨迹id
     const int trajectory_id = node_it->id.trajectory_id;
     // 获取这条轨迹的最后一个位置的迭代器
-    const auto trajectory_end = node_data_.EndOfTrajectory(trajectory_id);
+    const auto trajectory_end = node_data_.EndOfTrajectory(trajectory_id);  //jc:trajectory_id轨迹的最后一个位置的迭代器
     // 如果轨迹是frozen的, 则无需处理直接跳过
     if (frozen_trajectories.count(trajectory_id) != 0) {
       node_it = trajectory_end;
@@ -551,7 +551,7 @@ std::unique_ptr<transform::Rigid3d> OptimizationProblem2D::InterpolateOdometry(
  * @return std::unique_ptr<transform::Rigid3d> 两个节点的坐标变换
  */
 std::unique_ptr<transform::Rigid3d>
-OptimizationProblem2D::CalculateOdometryBetweenNodes(
+OptimizationProblem2D::CalculateOdometryBetweenNodes(                              //logic:由本文件397调用
     const int trajectory_id, const NodeSpec2D& first_node_data,
     const NodeSpec2D& second_node_data) const {
 
@@ -567,7 +567,7 @@ OptimizationProblem2D::CalculateOdometryBetweenNodes(
       // 需要注意的是, 实际上在optimization_problem中, node的位姿都是2d平面上的
       // 而odometry的pose是带姿态的, 因此要将轮速计插值出来的位姿转到平面上
       transform::Rigid3d relative_odometry =
-          transform::Rigid3d::Rotation(first_node_data.gravity_alignment) *
+          transform::Rigid3d::Rotation(first_node_data.gravity_alignment) *              //jc:前面一个历程计数据指向第二个里程计数据
           first_node_odometry->inverse() * (*second_node_odometry) *
           transform::Rigid3d::Rotation(
               second_node_data.gravity_alignment.inverse());

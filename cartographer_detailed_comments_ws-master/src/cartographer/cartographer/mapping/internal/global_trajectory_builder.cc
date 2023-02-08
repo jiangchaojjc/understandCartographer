@@ -185,7 +185,7 @@ class GlobalTrajectoryBuilder : public mapping::TrajectoryBuilderInterface {
 // 类模板不支持实参推演, 所以在类外指定模板参数的具体类型, 再进行类的实例化
 
 // 2d的完整的slam
-std::unique_ptr<TrajectoryBuilderInterface> CreateGlobalTrajectoryBuilder2D(
+std::unique_ptr<TrajectoryBuilderInterface> CreateGlobalTrajectoryBuilder2D(   //logic:由map_builder.cc 206行调用
     std::unique_ptr<LocalTrajectoryBuilder2D> local_trajectory_builder,
     const int trajectory_id, mapping::PoseGraph2D* const pose_graph,
     const TrajectoryBuilderInterface::LocalSlamResultCallback&

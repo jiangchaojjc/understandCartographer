@@ -27,7 +27,7 @@ POSE_GRAPH = {
     log_matches = true,                   -- 打印约束计算的log
     
     -- 基于分支定界算法的2d粗匹配器
-    fast_correlative_scan_matcher = {
+    fast_correlative_scan_matcher = {       
       linear_search_window = 7.,   //jc:7米 30弧度，分支定界的深度7
       angular_search_window = math.rad(30.),
       branch_and_bound_depth = 7,

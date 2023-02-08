@@ -73,7 +73,7 @@ class Task {
   void OnDependenyCompleted();
 
   // 需要执行的任务
-  WorkItem work_item_ GUARDED_BY(mutex_);
+  WorkItem work_item_ GUARDED_BY(mutex_);  //jc:类似于函数指针
   //jc:申明了一个线程池的指针
   ThreadPoolInterface* thread_pool_to_notify_ GUARDED_BY(mutex_) = nullptr;
   // 初始状态为NEW

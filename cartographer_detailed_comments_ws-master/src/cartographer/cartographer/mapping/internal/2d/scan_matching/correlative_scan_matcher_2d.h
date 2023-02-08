@@ -98,7 +98,7 @@ struct Candidate2D {
   // Score, higher is better.
   float score = 0.f;
 
-  bool operator<(const Candidate2D& other) const { return score < other.score; }
+  bool operator<(const Candidate2D& other) const { return score < other.score; }   //jc:重载了比较运算符
   bool operator>(const Candidate2D& other) const { return score > other.score; }
 };
 

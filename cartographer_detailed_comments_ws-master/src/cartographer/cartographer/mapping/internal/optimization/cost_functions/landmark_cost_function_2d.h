@@ -39,7 +39,7 @@ class LandmarkCostFunction2D {
   using LandmarkObservation =
       PoseGraphInterface::LandmarkNode::LandmarkObservation;
 
-  static ceres::CostFunction* CreateAutoDiffCostFunction(
+  static ceres::CostFunction* CreateAutoDiffCostFunction(                             //logic:由optimization_problem_2d.cc 175行调用
       const LandmarkObservation& observation, const NodeSpec2D& prev_node,
       const NodeSpec2D& next_node) {
     return new ceres::AutoDiffCostFunction<
@@ -63,11 +63,11 @@ class LandmarkCostFunction2D {
             next_node_gravity_alignment_, interpolation_parameter_);
     // 计算加权残差
     const std::array<T, 6> error = ScaleError(
-        ComputeUnscaledError(
+        ComputeUnscaledError(     
             landmark_to_tracking_transform_,
             std::get<0>(interpolated_rotation_and_translation).data(),
             std::get<1>(interpolated_rotation_and_translation).data(),
-            landmark_rotation, landmark_translation),
+            landmark_rotation, landmark_translation),                          //jc:landmark_rotation就是optimization_problem_2d中181中C_landmarks->at(landmark_id).rotation()
         translation_weight_, rotation_weight_);
     std::copy(std::begin(error), std::end(error), e);
     return true;
