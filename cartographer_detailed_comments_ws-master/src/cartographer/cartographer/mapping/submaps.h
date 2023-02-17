@@ -44,7 +44,7 @@ const float kMinLogOdds = Logit(kMinProbability);
 
 // Converts a probability to a log odds integer. 0 means unknown, [kMinLogOdds,
 // kMaxLogOdds] is mapped to [1, 255].
-inline uint8 ProbabilityToLogOddsInteger(const float probability) {
+inline uint8 ProbabilityToLogOddsInteger(const float probability) { //jc:根据传入的概率值将概率值转成1~255之间的数
   const int value = common::RoundToInt((Logit(probability) - kMinLogOdds) *
                                        254.f / (kMaxLogOdds - kMinLogOdds)) +
                     1;

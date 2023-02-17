@@ -39,7 +39,7 @@ namespace optimization {
  * @return std::array<T, 3> 
  */
 template <typename T>
-static std::array<T, 3> ComputeUnscaledError(
+static std::array<T, 3> ComputeUnscaledError(                                //logic:由spa_cost_function_2d.cc 45行调用
     const transform::Rigid2d& relative_pose, const T* const start,
     const T* const end) {
   // 旋转矩阵R
@@ -47,11 +47,11 @@ static std::array<T, 3> ComputeUnscaledError(
   const T sin_theta_i = sin(start[2]);
   const T delta_x = end[0] - start[0]; // t2 -t1
   const T delta_y = end[1] - start[1];
-  const T h[3] = {cos_theta_i * delta_x + sin_theta_i * delta_y, // R.inverse * (t2 -t1)
+  const T h[3] = {cos_theta_i * delta_x + sin_theta_i * delta_y, // R.inverse * (t2 -t1)   //jc:h为start 到end的坐标变换，，节点与子图原点在global坐标系下的坐标变换
                   -sin_theta_i * delta_x + cos_theta_i * delta_y,
                   end[2] - start[2]};
-  return {{T(relative_pose.translation().x()) - h[0],
-           T(relative_pose.translation().y()) - h[1],
+  return {{T(relative_pose.translation().x()) - h[0],                             //jc:relative_pose子图内坐标变换和子图间坐标变换
+           T(relative_pose.translation().y()) - h[1],                                 //jc:相减之后得到残差
            common::NormalizeAngleDifference(
                T(relative_pose.rotation().angle()) - h[2])}};
 }
@@ -80,15 +80,15 @@ std::array<T, 3> ScaleError(const std::array<T, 3>& error,
  * @return std::array<T, 6> 
  */
 template <typename T>
-static std::array<T, 6> ComputeUnscaledError(
+static std::array<T, 6> ComputeUnscaledError(                                                     //jc:计算6维度的残差，由lanmark_cost_function_2d.h66行调用
     const transform::Rigid3d& relative_pose, const T* const start_rotation,
     const T* const start_translation, const T* const end_rotation,
     const T* const end_translation) {
-  const Eigen::Quaternion<T> R_i_inverse(start_rotation[0], -start_rotation[1],
+  const Eigen::Quaternion<T> R_i_inverse(start_rotation[0], -start_rotation[1],                //jc:取前面这个四元素的逆（共轭）
                                          -start_rotation[2],
                                          -start_rotation[3]);
 
-  const Eigen::Matrix<T, 3, 1> delta(end_translation[0] - start_translation[0],
+  const Eigen::Matrix<T, 3, 1> delta(end_translation[0] - start_translation[0],                 //jc:计算两个坐标的差
                                      end_translation[1] - start_translation[1],
                                      end_translation[2] - start_translation[2]);
   // start到end的平移
@@ -96,7 +96,7 @@ static std::array<T, 6> ComputeUnscaledError(
 
   // start到end的旋转 四元数的转置就是逆
   const Eigen::Quaternion<T> h_rotation_inverse =
-      Eigen::Quaternion<T>(end_rotation[0], -end_rotation[1], -end_rotation[2],
+      Eigen::Quaternion<T>(end_rotation[0], -end_rotation[1], -end_rotation[2],                 //jc:计算两个四元素的差值
                            -end_rotation[3]) *
       Eigen::Quaternion<T>(start_rotation[0], start_rotation[1],
                            start_rotation[2], start_rotation[3]);
@@ -134,8 +134,8 @@ std::array<T, 6> ScaleError(const std::array<T, 6>& error,
 // platforms. Our own implementation is used instead.
 // slerp 的Eigen实现与所有支持平台上的 Ceres 不兼容, 所以自己实现
 template <typename T>
-std::array<T, 4> SlerpQuaternions(const T* const start, const T* const end,
-                                  double factor) {
+std::array<T, 4> SlerpQuaternions(const T* const start, const T* const end,                      //logic:由本文件225行调用
+                                  double factor) {                                                   //jc:两个四元素（角度）求插值四元素
   // Angle 'theta' is the half-angle "between" quaternions. It can be computed
   // as the arccosine of their dot product.
   const T cos_theta = start[0] * end[0] + start[1] * end[1] +
@@ -195,19 +195,19 @@ InterpolateNodes3D(const T* const prev_node_rotation,
  */
 template <typename T>
 std::tuple<std::array<T, 4> /* rotation */, std::array<T, 3> /* translation */>
-InterpolateNodes2D(const T* const prev_node_pose,
+InterpolateNodes2D(const T* const prev_node_pose,                                           //logic:由optimization_problem_2d.cc105 行调用，计算landmark插值姿态
                    const Eigen::Quaterniond& prev_node_gravity_alignment,
                    const T* const next_node_pose,
                    const Eigen::Quaterniond& next_node_gravity_alignment,
                    const double interpolation_parameter) {
   // The following is equivalent to (Embed3D(prev_node_pose) *
   // Rigid3d::Rotation(prev_node_gravity_alignment)).rotation().
-  const Eigen::Quaternion<T> prev_quaternion(
+  const Eigen::Quaternion<T> prev_quaternion(                                              //jc:前面节点的姿态
       (Eigen::AngleAxis<T>(prev_node_pose[2], Eigen::Matrix<T, 3, 1>::UnitZ()) *
        prev_node_gravity_alignment.cast<T>())
           .normalized());
   // 转成std::array
-  const std::array<T, 4> prev_node_rotation = {
+  const std::array<T, 4> prev_node_rotation = {                                             //jc:前面节点的朝向，四元素表示
       {prev_quaternion.w(), prev_quaternion.x(), prev_quaternion.y(),
        prev_quaternion.z()}};
 
@@ -222,16 +222,16 @@ InterpolateNodes2D(const T* const prev_node_pose,
        next_quaternion.z()}};
 
   return std::make_tuple(
-      SlerpQuaternions(prev_node_rotation.data(), next_node_rotation.data(),
-                       interpolation_parameter),
+      SlerpQuaternions(prev_node_rotation.data(), next_node_rotation.data(),                  //jc:角度的插值，prev_node_rotation.data()为前面节点姿态，next_node_rotation后面节点姿态
+                       interpolation_parameter),                                                //jc:interpolation_parameter为权重系数
       // 通过插值公式计算出这个时刻的glboal位姿
       std::array<T, 3>{
-          {prev_node_pose[0] + interpolation_parameter *
+          {prev_node_pose[0] + interpolation_parameter *                                   //jc:x1+系数*(x2-x1)求出x方向的插值
                                    (next_node_pose[0] - prev_node_pose[0]),
-           prev_node_pose[1] + interpolation_parameter *
+           prev_node_pose[1] + interpolation_parameter *                                   //jc:y1+系数*(y2-y1)求出y方向的插值
                                    (next_node_pose[1] - prev_node_pose[1]),
-           T(0)}});
-}
+           T(0)}});                                                                         //jc:T(0)}} 设置z为0
+}   
 
 }  // namespace optimization
 }  // namespace mapping

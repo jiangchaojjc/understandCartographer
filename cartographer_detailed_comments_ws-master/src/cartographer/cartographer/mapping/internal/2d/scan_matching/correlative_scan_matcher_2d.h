@@ -29,7 +29,7 @@ namespace cartographer {
 namespace mapping {
 namespace scan_matching {
 
-typedef std::vector<Eigen::Array2i> DiscreteScan2D;
+typedef std::vector<Eigen::Array2i> DiscreteScan2D;  //jc:array2i就是栅格地图的索引
 
 // Describes the search space.
 struct SearchParameters {
@@ -80,7 +80,7 @@ struct Candidate2D {
         y_index_offset(init_y_index_offset),
         x(-y_index_offset * search_parameters.resolution),
         y(-x_index_offset * search_parameters.resolution),
-        orientation((scan_index - search_parameters.num_angular_perturbations) *
+        orientation((scan_index - search_parameters.num_angular_perturbations) *  //jc:这里保存了旋转量
                     search_parameters.angular_perturbation_step_size) {}
 
   // Index into the rotated scans vector.
@@ -98,7 +98,7 @@ struct Candidate2D {
   // Score, higher is better.
   float score = 0.f;
 
-  bool operator<(const Candidate2D& other) const { return score < other.score; }
+  bool operator<(const Candidate2D& other) const { return score < other.score; }   //jc:重载了比较运算符
   bool operator>(const Candidate2D& other) const { return score > other.score; }
 };
 

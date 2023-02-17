@@ -51,7 +51,7 @@ class PoseGraphInterface {
     // Differentiates between intra-submap (where node 'j' was inserted into
     // submap 'i') and inter-submap constraints (where node 'j' was not inserted
     // into submap 'i').
-    enum Tag { INTRA_SUBMAP, INTER_SUBMAP } tag;
+    enum Tag { INTRA_SUBMAP, INTER_SUBMAP } tag; //jc:子图内约束和子图间约束
   };
 
   struct LandmarkNode {
@@ -70,12 +70,12 @@ class PoseGraphInterface {
     bool frozen = false;
   };
 
-  struct SubmapPose {
+  struct SubmapPose {   //jc:子图原点的坐标
     int version;
     transform::Rigid3d pose;
   };
 
-  struct SubmapData {
+  struct SubmapData {   //jc:这里存了具体的栅格数据
     std::shared_ptr<const Submap> submap;
     transform::Rigid3d pose;
   };

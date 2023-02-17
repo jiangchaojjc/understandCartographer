@@ -55,13 +55,13 @@ constexpr char kTfStaticTopic[] = "/tf_static";
 namespace carto = ::cartographer;
 
 std::unique_ptr<carto::io::PointsProcessorPipelineBuilder>
-CreatePipelineBuilder(
+CreatePipelineBuilder(                 //logic:本文件139行调用
     const std::vector<carto::mapping::proto::Trajectory>& trajectories,
     const std::string file_prefix) {
   const auto file_writer_factory =
       AssetsWriter::CreateFileWriterFactory(file_prefix);
   auto builder = absl::make_unique<carto::io::PointsProcessorPipelineBuilder>();
-  carto::io::RegisterBuiltInPointsProcessors(trajectories, file_writer_factory,
+  carto::io::RegisterBuiltInPointsProcessors(trajectories, file_writer_factory,   //logic:调用points_processor_pipeline_builder.cc 80行
                                              builder.get());
   builder->Register(RosMapWritingPointsProcessor::kConfigurationFileActionName,
                     [file_writer_factory](
@@ -136,7 +136,7 @@ std::unique_ptr<carto::io::PointsBatch> HandleMessage(
 
 }  // namespace
 
-AssetsWriter::AssetsWriter(const std::string& pose_graph_filename,
+AssetsWriter::AssetsWriter(const std::string& pose_graph_filename,      //logic:assets_writer_main.cc 57行调用
                            const std::vector<std::string>& bag_filenames,
                            const std::string& output_file_prefix)
     : bag_filenames_(bag_filenames),

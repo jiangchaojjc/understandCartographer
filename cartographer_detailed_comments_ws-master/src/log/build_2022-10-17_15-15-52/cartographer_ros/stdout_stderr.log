@@ -1,0 +1,163 @@
+-- The C compiler identification is GNU 9.4.0
+-- The CXX compiler identification is GNU 9.4.0
+-- Check for working C compiler: /usr/bin/cc
+-- Check for working C compiler: /usr/bin/cc -- works
+-- Detecting C compiler ABI info
+-- Detecting C compiler ABI info - done
+-- Detecting C compile features
+-- Detecting C compile features - done
+-- Check for working CXX compiler: /usr/bin/c++
+-- Check for working CXX compiler: /usr/bin/c++ -- works
+-- Detecting CXX compiler ABI info
+-- Detecting CXX compiler ABI info - done
+-- Detecting CXX compile features
+-- Detecting CXX compile features - done
+-- Found ament_cmake: 0.9.9 (/opt/ros/foxy/share/ament_cmake/cmake)
+-- Found PythonInterp: /usr/bin/python3 (found suitable version "3.8.10", minimum required is "3") 
+-- Using PYTHON_EXECUTABLE: /usr/bin/python3
+-- Found installed version of Eigen: /usr/lib/cmake/eigen3
+-- Found required Ceres dependency: Eigen version 3.3.7 in /usr/include/eigen3
+-- Found required Ceres dependency: glog
+-- Found installed version of gflags: /usr/lib/x86_64-linux-gnu/cmake/gflags
+-- Detected gflags version: 2.2.2
+-- Found required Ceres dependency: gflags
+-- Found Ceres version: 1.14.0 installed in: /usr with components: [EigenSparse, SparseLinearAlgebraLibrary, LAPACK, SuiteSparse, CXSparse, SchurSpecializations, OpenMP, Multithreading]
+-- Build type: Release
+Files /home/jc/carto_ws/src/build/cartographer_ros/AllFiles.cmake and - differ
+-- Found cartographer_ros_msgs: 1.0.9003 (/home/jc/carto_ws/src/install/cartographer_ros_msgs/share/cartographer_ros_msgs/cmake)
+-- Using all available rosidl_typesupport_c: rosidl_typesupport_fastrtps_c;rosidl_typesupport_introspection_c
+-- Found rosidl_adapter: 1.2.1 (/opt/ros/foxy/share/rosidl_adapter/cmake)
+-- Found OpenSSL: /usr/lib/x86_64-linux-gnu/libcrypto.so (found version "1.1.1f")  
+-- Found FastRTPS: /opt/ros/foxy/include  
+-- Using all available rosidl_typesupport_cpp: rosidl_typesupport_fastrtps_cpp;rosidl_typesupport_introspection_cpp
+-- Found nav_msgs: 2.0.5 (/opt/ros/foxy/share/nav_msgs/cmake)
+-- Found pcl_conversions: 2.2.1 (/opt/ros/foxy/share/pcl_conversions/cmake)
+-- Found rmw_implementation_cmake: 1.0.3 (/opt/ros/foxy/share/rmw_implementation_cmake/cmake)
+-- Using RMW implementation 'rmw_fastrtps_cpp' as default
+-- Looking for pthread.h
+-- Looking for pthread.h - found
+-- Performing Test CMAKE_HAVE_LIBC_PTHREAD
+-- Performing Test CMAKE_HAVE_LIBC_PTHREAD - Failed
+-- Looking for pthread_create in pthreads
+-- Looking for pthread_create in pthreads - not found
+-- Looking for pthread_create in pthread
+-- Looking for pthread_create in pthread - found
+-- Found Threads: TRUE  
+-- Found tf2: 0.13.13 (/opt/ros/foxy/share/tf2/cmake)
+-- Found tf2_ros: 0.13.13 (/opt/ros/foxy/share/tf2_ros/cmake)
+-- Found tf2_eigen: 0.13.13 (/opt/ros/foxy/share/tf2_eigen/cmake)
+-- Found visualization_msgs: 2.0.5 (/opt/ros/foxy/share/visualization_msgs/cmake)
+-- Found Lua: /usr/lib/x86_64-linux-gnu/liblua5.3.so;/usr/lib/x86_64-linux-gnu/libm.so (found version "5.3.3") 
+-- Checking for module 'eigen3'
+--   Found eigen3, version 3.3.7
+-- Found Eigen: /usr/include/eigen3 (Required is at least version "3.1") 
+-- Eigen found (include: /usr/include/eigen3, version: 3.3.7)
+-- Found Boost: /usr/include (found suitable version "1.71.0", minimum required is "1.55.0") found components: system filesystem date_time iostreams regex 
+-- looking for PCL_COMMON
+-- Found PCL_COMMON: /usr/lib/x86_64-linux-gnu/libpcl_common.so  
+-- Found PCL: pcl_common;/usr/lib/x86_64-linux-gnu/libboost_system.so;/usr/lib/x86_64-linux-gnu/libboost_filesystem.so;/usr/lib/x86_64-linux-gnu/libboost_date_time.so;/usr/lib/x86_64-linux-gnu/libboost_iostreams.so;/usr/lib/x86_64-linux-gnu/libboost_regex.so  
+-- Found Eigen3: TRUE (found version "3.3.7") 
+-- Configuring done
+-- Generating done
+-- Build files have been written to: /home/jc/carto_ws/src/build/cartographer_ros
+[35m[1mScanning dependencies of target cartographer_ros[0m
+[35m[1mScanning dependencies of target cartographer_ros_detect_changes[0m
+[  0%] Built target cartographer_ros_detect_changes
+[  5%] [32mBuilding CXX object CMakeFiles/cartographer_ros.dir/cartographer_ros/map_builder_bridge.cc.o[0m
+[ 15%] [32mBuilding CXX object CMakeFiles/cartographer_ros.dir/cartographer_ros/ros_log_sink.cc.o[0m
+[ 15%] [32mBuilding CXX object CMakeFiles/cartographer_ros.dir/cartographer_ros/node_constants.cc.o[0m
+[ 21%] [32mBuilding CXX object CMakeFiles/cartographer_ros.dir/cartographer_ros/tf_bridge.cc.o[0m
+[ 26%] [32mBuilding CXX object CMakeFiles/cartographer_ros.dir/cartographer_ros/ros_map.cc.o[0m
+[ 31%] [32mBuilding CXX object CMakeFiles/cartographer_ros.dir/cartographer_ros/submap.cc.o[0m
+[ 36%] [32mBuilding CXX object CMakeFiles/cartographer_ros.dir/cartographer_ros/msg_conversion.cc.o[0m
+[ 42%] [32mBuilding CXX object CMakeFiles/cartographer_ros.dir/cartographer_ros/node_options.cc.o[0m
+[ 47%] [32mBuilding CXX object CMakeFiles/cartographer_ros.dir/cartographer_ros/trajectory_options.cc.o[0m
+[ 57%] [32mBuilding CXX object CMakeFiles/cartographer_ros.dir/cartographer_ros/time_conversion.cc.o[0m
+[ 57%] [32mBuilding CXX object CMakeFiles/cartographer_ros.dir/cartographer_ros/sensor_bridge.cc.o[0m
+[ 63%] [32mBuilding CXX object CMakeFiles/cartographer_ros.dir/cartographer_ros/node.cc.o[0m
+[ 68%] [32m[1mLinking CXX static library libcartographer_ros.a[0m
+[ 68%] Built target cartographer_ros
+[35m[1mScanning dependencies of target occupancy_grid_node[0m
+[35m[1mScanning dependencies of target pbstream_to_ros_map_node[0m
+[35m[1mScanning dependencies of target cartographer_node[0m
+[ 73%] [32mBuilding CXX object cartographer_ros/CMakeFiles/pbstream_to_ros_map_node.dir/pbstream_to_ros_map_main.cc.o[0m
+[ 78%] [32mBuilding CXX object cartographer_ros/CMakeFiles/occupancy_grid_node.dir/occupancy_grid_node_main.cc.o[0m
+[ 84%] [32mBuilding CXX object cartographer_ros/CMakeFiles/cartographer_node.dir/node_main.cc.o[0m
+[ 89%] [32m[1mLinking CXX executable pbstream_to_ros_map_node[0m
+[ 89%] Built target pbstream_to_ros_map_node
+[ 94%] [32m[1mLinking CXX executable cartographer_node[0m
+[ 94%] Built target cartographer_node
+[100%] [32m[1mLinking CXX executable occupancy_grid_node[0m
+[100%] Built target occupancy_grid_node
+-- Install configuration: "Release"
+-- Installing: /home/jc/carto_ws/src/install/cartographer_ros/share/cartographer_ros//configuration_files
+-- Installing: /home/jc/carto_ws/src/install/cartographer_ros/share/cartographer_ros//configuration_files/backpack_2d.lua
+-- Installing: /home/jc/carto_ws/src/install/cartographer_ros/share/cartographer_ros//configuration_files/assets_writer_backpack_2d.lua
+-- Installing: /home/jc/carto_ws/src/install/cartographer_ros/share/cartographer_ros//configuration_files/taurob_tracker.lua
+-- Installing: /home/jc/carto_ws/src/install/cartographer_ros/share/cartographer_ros//configuration_files/transform.lua
+-- Installing: /home/jc/carto_ws/src/install/cartographer_ros/share/cartographer_ros//configuration_files/pr2.lua
+-- Installing: /home/jc/carto_ws/src/install/cartographer_ros/share/cartographer_ros//configuration_files/backpack_2d_localization.lua
+-- Installing: /home/jc/carto_ws/src/install/cartographer_ros/share/cartographer_ros//configuration_files/visualize_pbstream.lua
+-- Installing: /home/jc/carto_ws/src/install/cartographer_ros/share/cartographer_ros//configuration_files/assets_writer_backpack_3d.lua
+-- Installing: /home/jc/carto_ws/src/install/cartographer_ros/share/cartographer_ros//configuration_files/demo_3d.rviz
+-- Installing: /home/jc/carto_ws/src/install/cartographer_ros/share/cartographer_ros//configuration_files/backpack_3d_localization.lua
+-- Installing: /home/jc/carto_ws/src/install/cartographer_ros/share/cartographer_ros//configuration_files/backpack_2d_localization_evaluation.lua
+-- Installing: /home/jc/carto_ws/src/install/cartographer_ros/share/cartographer_ros//configuration_files/my_lds_2d.lua
+-- Installing: /home/jc/carto_ws/src/install/cartographer_ros/share/cartographer_ros//configuration_files/backpack_3d.lua
+-- Installing: /home/jc/carto_ws/src/install/cartographer_ros/share/cartographer_ros//configuration_files/backpack_2d_server.lua
+-- Installing: /home/jc/carto_ws/src/install/cartographer_ros/share/cartographer_ros//configuration_files/assets_writer_backpack_2d_ci.lua
+-- Installing: /home/jc/carto_ws/src/install/cartographer_ros/share/cartographer_ros//configuration_files/demo_2d.rviz
+-- Installing: /home/jc/carto_ws/src/install/cartographer_ros/share/cartographer_ros//configuration_files/assets_writer_ros_map.lua
+-- Installing: /home/jc/carto_ws/src/install/cartographer_ros/share/cartographer_ros//configuration_files/revo_lds.lua
+-- Installing: /home/jc/carto_ws/src/install/cartographer_ros/share/cartographer_ros//launch
+-- Installing: /home/jc/carto_ws/src/install/cartographer_ros/share/cartographer_ros//launch/cartographer.launch.py
+-- Installing: /home/jc/carto_ws/src/install/cartographer_ros/share/cartographer_ros//launch/demo_revo_lds.launch
+-- Installing: /home/jc/carto_ws/src/install/cartographer_ros/share/cartographer_ros//launch/demo_taurob_tracker.launch
+-- Installing: /home/jc/carto_ws/src/install/cartographer_ros/share/cartographer_ros//launch/grpc_demo_backpack_2d.launch
+-- Installing: /home/jc/carto_ws/src/install/cartographer_ros/share/cartographer_ros//launch/assets_writer_backpack_2d.launch
+-- Installing: /home/jc/carto_ws/src/install/cartographer_ros/share/cartographer_ros//launch/demo_backpack_2d_localization.launch
+-- Installing: /home/jc/carto_ws/src/install/cartographer_ros/share/cartographer_ros//launch/demo_backpack_3d.launch
+-- Installing: /home/jc/carto_ws/src/install/cartographer_ros/share/cartographer_ros//launch/backpack_2d.launch.py
+-- Installing: /home/jc/carto_ws/src/install/cartographer_ros/share/cartographer_ros//launch/demo_backpack_2d_localization.launch.py
+-- Installing: /home/jc/carto_ws/src/install/cartographer_ros/share/cartographer_ros//launch/assets_writer_backpack_3d.launch
+-- Installing: /home/jc/carto_ws/src/install/cartographer_ros/share/cartographer_ros//launch/taurob_tracker.launch
+-- Installing: /home/jc/carto_ws/src/install/cartographer_ros/share/cartographer_ros//launch/backpack_2d.launch
+-- Installing: /home/jc/carto_ws/src/install/cartographer_ros/share/cartographer_ros//launch/demo_backpack_2d.launch.py
+-- Installing: /home/jc/carto_ws/src/install/cartographer_ros/share/cartographer_ros//launch/demo_backpack_2d.launch
+-- Installing: /home/jc/carto_ws/src/install/cartographer_ros/share/cartographer_ros//launch/visualize_pbstream.launch
+-- Installing: /home/jc/carto_ws/src/install/cartographer_ros/share/cartographer_ros//launch/offline_backpack_2d.launch
+-- Installing: /home/jc/carto_ws/src/install/cartographer_ros/share/cartographer_ros//launch/backpack_3d.launch
+-- Installing: /home/jc/carto_ws/src/install/cartographer_ros/share/cartographer_ros//launch/assets_writer_ros_map.launch
+-- Installing: /home/jc/carto_ws/src/install/cartographer_ros/share/cartographer_ros//launch/grpc_demo_backpack_2d_localization.launch
+-- Installing: /home/jc/carto_ws/src/install/cartographer_ros/share/cartographer_ros//launch/offline_backpack_3d.launch
+-- Installing: /home/jc/carto_ws/src/install/cartographer_ros/share/cartographer_ros//launch/demo_pr2.launch
+-- Installing: /home/jc/carto_ws/src/install/cartographer_ros/share/cartographer_ros//launch/occupancy_grid.launch.py
+-- Installing: /home/jc/carto_ws/src/install/cartographer_ros/share/cartographer_ros//launch/demo_backpack_3d_localization.launch
+-- Installing: /home/jc/carto_ws/src/install/cartographer_ros/share/cartographer_ros//urdf
+-- Installing: /home/jc/carto_ws/src/install/cartographer_ros/share/cartographer_ros//urdf/backpack_2d.urdf
+-- Installing: /home/jc/carto_ws/src/install/cartographer_ros/share/cartographer_ros//urdf/backpack_3d.urdf
+-- Installing: /home/jc/carto_ws/src/install/cartographer_ros/share/cartographer_ros//rviz
+-- Installing: /home/jc/carto_ws/src/install/cartographer_ros/share/cartographer_ros//rviz/mycarto.rviz
+-- Installing: /home/jc/carto_ws/src/install/cartographer_ros/share/cartographer_ros//rviz/cartographer.rviz
+-- Installing: /home/jc/carto_ws/src/install/cartographer_ros/lib/libcartographer_ros.a
+-- Installing: /home/jc/carto_ws/src/install/cartographer_ros/share/ament_index/resource_index/package_run_dependencies/cartographer_ros
+-- Installing: /home/jc/carto_ws/src/install/cartographer_ros/share/ament_index/resource_index/parent_prefix_path/cartographer_ros
+-- Installing: /home/jc/carto_ws/src/install/cartographer_ros/share/cartographer_ros/environment/ament_prefix_path.sh
+-- Installing: /home/jc/carto_ws/src/install/cartographer_ros/share/cartographer_ros/environment/ament_prefix_path.dsv
+-- Installing: /home/jc/carto_ws/src/install/cartographer_ros/share/cartographer_ros/environment/path.sh
+-- Installing: /home/jc/carto_ws/src/install/cartographer_ros/share/cartographer_ros/environment/path.dsv
+-- Installing: /home/jc/carto_ws/src/install/cartographer_ros/share/cartographer_ros/local_setup.bash
+-- Installing: /home/jc/carto_ws/src/install/cartographer_ros/share/cartographer_ros/local_setup.sh
+-- Installing: /home/jc/carto_ws/src/install/cartographer_ros/share/cartographer_ros/local_setup.zsh
+-- Installing: /home/jc/carto_ws/src/install/cartographer_ros/share/cartographer_ros/local_setup.dsv
+-- Installing: /home/jc/carto_ws/src/install/cartographer_ros/share/cartographer_ros/package.dsv
+-- Installing: /home/jc/carto_ws/src/install/cartographer_ros/share/ament_index/resource_index/packages/cartographer_ros
+-- Installing: /home/jc/carto_ws/src/install/cartographer_ros/share/cartographer_ros/cmake/cartographer_rosConfig.cmake
+-- Installing: /home/jc/carto_ws/src/install/cartographer_ros/share/cartographer_ros/cmake/cartographer_rosConfig-version.cmake
+-- Installing: /home/jc/carto_ws/src/install/cartographer_ros/share/cartographer_ros/package.xml
+-- Installing: /home/jc/carto_ws/src/install/cartographer_ros/lib/cartographer_ros/cartographer_node
+-- Set runtime path of "/home/jc/carto_ws/src/install/cartographer_ros/lib/cartographer_ros/cartographer_node" to ""
+-- Installing: /home/jc/carto_ws/src/install/cartographer_ros/lib/cartographer_ros/occupancy_grid_node
+-- Set runtime path of "/home/jc/carto_ws/src/install/cartographer_ros/lib/cartographer_ros/occupancy_grid_node" to ""
+-- Installing: /home/jc/carto_ws/src/install/cartographer_ros/lib/cartographer_ros/pbstream_to_ros_map_node
+-- Set runtime path of "/home/jc/carto_ws/src/install/cartographer_ros/lib/cartographer_ros/pbstream_to_ros_map_node" to ""

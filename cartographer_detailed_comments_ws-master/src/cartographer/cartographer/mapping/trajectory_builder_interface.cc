@@ -56,7 +56,7 @@ void PopulatePoseGraphOdometryMotionFilterOptions(
 
 }  // namespace
 
-proto::TrajectoryBuilderOptions CreateTrajectoryBuilderOptions(  //jc:将2D的配置文件的参数都返回给 TrajectoryOptions options
+proto::TrajectoryBuilderOptions CreateTrajectoryBuilderOptions(  //jc:将2D的配置文件的参数都返回给 TrajectoryOptions options 由trajectroy_option.cc 52行调用
     common::LuaParameterDictionary* const parameter_dictionary) {
   proto::TrajectoryBuilderOptions options;
   *options.mutable_trajectory_builder_2d_options() =

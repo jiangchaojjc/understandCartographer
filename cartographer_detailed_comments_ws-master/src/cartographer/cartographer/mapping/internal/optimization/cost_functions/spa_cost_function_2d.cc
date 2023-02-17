@@ -42,7 +42,7 @@ class SpaCostFunction2D {
                   T* e) const {
     const std::array<T, 3> error =
         // 计算残差并乘以尺度
-        ScaleError(ComputeUnscaledError(
+        ScaleError(ComputeUnscaledError(                                                       //jc:得到残差   //ScaleError为衬衣不同的权重因子            
                        transform::Project2D(observed_relative_pose_.zbar_ij),
                        start_pose, end_pose),
                    observed_relative_pose_.translation_weight,
@@ -139,15 +139,15 @@ class AnalyticalSpaCostFunction2D
 }  // namespace
 
 // 创建AutoDiffSpaCostFunction
-ceres::CostFunction* CreateAutoDiffSpaCostFunction(
-    const PoseGraphInterface::Constraint::Pose& observed_relative_pose) {
-  return new ceres::AutoDiffCostFunction<SpaCostFunction2D, 3 /* residuals */,
+ceres::CostFunction* CreateAutoDiffSpaCostFunction(                                    //logic:由optimization 348行 调用
+    const PoseGraphInterface::Constraint::Pose& observed_relative_pose) { 
+  return new ceres::AutoDiffCostFunction<SpaCostFunction2D, 3 /* residuals */,   //jc:调用自动求导的AutoDiffCostFunction 3个维度的残差块，xyz
                                          3 /* start pose variables */,
                                          3 /* end pose variables */>(
-      new SpaCostFunction2D(observed_relative_pose));
+      new SpaCostFunction2D(observed_relative_pose));                             //logic:调用本文件 34行 
 }
 
-ceres::CostFunction* CreateAnalyticalSpaCostFunction(
+ceres::CostFunction* CreateAnalyticalSpaCostFunction(                      //jc:单元测试用例
     const PoseGraphInterface::Constraint::Pose& observed_relative_pose) {
   return new AnalyticalSpaCostFunction2D(observed_relative_pose);
 }

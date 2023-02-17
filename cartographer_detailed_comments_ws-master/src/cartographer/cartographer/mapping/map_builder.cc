@@ -83,14 +83,14 @@ void MaybeAddPureLocalizationTrimmer(
  * 
  * @param[in] options proto::MapBuilderOptions格式的 map_builder参数
  */
-MapBuilder::MapBuilder(const proto::MapBuilderOptions& options)
+MapBuilder::MapBuilder(const proto::MapBuilderOptions& options) //jc:在这里根据num_background_threads参数配置构造线程池，num_background_threads线程的个数
     : options_(options), thread_pool_(options.num_background_threads()) { // param: num_background_threads
-  CHECK(options.use_trajectory_builder_2d() ^
+  CHECK(options.use_trajectory_builder_2d() ^    
         options.use_trajectory_builder_3d());
 
   // 2d位姿图(后端)的初始化
   if (options.use_trajectory_builder_2d()) {
-    pose_graph_ = absl::make_unique<PoseGraph2D>(
+    pose_graph_ = absl::make_unique<PoseGraph2D>(  //jc:这里构造了poseGraph2D的构造函数
         options_.pose_graph_options(),
         absl::make_unique<optimization::OptimizationProblem2D>(
             options_.pose_graph_options().optimization_problem_options()),
@@ -124,7 +124,7 @@ MapBuilder::MapBuilder(const proto::MapBuilderOptions& options)
  *        实际上是map_builder_bridge.cc 中的 OnLocalSlamResult() 函数
  * @return int 新生成的轨迹的id
  */
-int MapBuilder::AddTrajectoryBuilder(
+int MapBuilder::AddTrajectoryBuilder(  //logic:由map_builder_bridge.cc 143行调用
     const std::set<SensorId>& expected_sensor_ids,
     const proto::TrajectoryBuilderOptions& trajectory_options,
     LocalSlamResultCallback local_slam_result_callback) {
@@ -191,7 +191,7 @@ int MapBuilder::AddTrajectoryBuilder(
     std::unique_ptr<LocalTrajectoryBuilder2D> local_trajectory_builder;
     if (trajectory_options.has_trajectory_builder_2d_options()) {
       // local_trajectory_builder(前端)的初始化
-      local_trajectory_builder = absl::make_unique<LocalTrajectoryBuilder2D>(
+      local_trajectory_builder = absl::make_unique<LocalTrajectoryBuilder2D>(  //logic:调用local_trajectory_builder_2d.cc 44行
           trajectory_options.trajectory_builder_2d_options(),
           SelectRangeSensorIds(expected_sensor_ids));
     }
@@ -203,7 +203,7 @@ int MapBuilder::AddTrajectoryBuilder(
         trajectory_options, sensor_collator_.get(), trajectory_id,
         expected_sensor_ids,
         // 将2D前端与2D位姿图打包在一起, 传入CollatedTrajectoryBuilder
-        CreateGlobalTrajectoryBuilder2D(
+        CreateGlobalTrajectoryBuilder2D(                                     //logic:调用global_trajectory_builder.cc 188 行
             std::move(local_trajectory_builder), trajectory_id,
             static_cast<PoseGraph2D*>(pose_graph_.get()),
             local_slam_result_callback, pose_graph_odometry_motion_filter)));
@@ -278,7 +278,7 @@ std::string MapBuilder::SubmapToProto(
   }
 
   // 将压缩后的地图数据放入response
-  submap_data.submap->ToResponseProto(submap_data.pose, response);
+  submap_data.submap->ToResponseProto(submap_data.pose, response);   //jc:调用submap_2d.cc下145行
   return "";
 }
 

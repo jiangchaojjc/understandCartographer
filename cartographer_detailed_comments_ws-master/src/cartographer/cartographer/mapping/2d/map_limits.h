@@ -89,18 +89,18 @@ class MapLimits {
   // Returns the index of the cell containing the 'point' which may be outside
   // the map, i.e., negative or too large indices that will return false for
   // Contains().
-  // 计算物理坐标点的像素索引  //jc:世界坐标转到地图坐标
+  // 计算物理坐标点的像素索引  //jc:世界坐标转到地图像素坐标
   Eigen::Array2i GetCellIndex(const Eigen::Vector2f& point) const {
     // Index values are row major and the top left has Eigen::Array2i::Zero()
     // and contains (centered_max_x, centered_max_y). We need to flip and
     // rotate.
     return Eigen::Array2i(
-        common::RoundToInt((max_.y() - point.y()) / resolution_ - 0.5),
+        common::RoundToInt((max_.y() - point.y()) / resolution_ - 0.5),  //jc: 因为方向相反，所以max() -  操作
         common::RoundToInt((max_.x() - point.x()) / resolution_ - 0.5));
   }
 
   // Returns the center of the cell at 'cell_index'.
-  // 根据像素索引算物理坐标  //jc:地图坐标转到世界坐标
+  // 根据像素索引算物理坐标  //jc:地图像素坐标转到世界坐标
   Eigen::Vector2f GetCellCenter(const Eigen::Array2i cell_index) const {
     return {max_.x() - resolution() * (cell_index[1] + 0.5),
             max_.y() - resolution() * (cell_index[0] + 0.5)};   

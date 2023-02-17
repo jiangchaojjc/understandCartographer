@@ -39,7 +39,7 @@ PoseExtrapolator::PoseExtrapolator(const common::Duration pose_queue_duration,
                                 transform::Rigid3d::Identity()} {}
 
 // 使用imu数据进行PoseExtrapolator的初始化
-std::unique_ptr<PoseExtrapolator> PoseExtrapolator::InitializeWithImu(
+std::unique_ptr<PoseExtrapolator> PoseExtrapolator::InitializeWithImu(   //logic:由local_trajectory_builder_2d.cc 452行调用
     const common::Duration pose_queue_duration,
     const double imu_gravity_time_constant, const sensor::ImuData& imu_data) {
   auto extrapolator = absl::make_unique<PoseExtrapolator>(
@@ -76,7 +76,7 @@ common::Time PoseExtrapolator::GetLastExtrapolatedTime() const {
 }
 
 // 将扫描匹配后的pose加入到pose队列中,计算线速度与角速度,并将imu_tracker_的状态更新到time时刻
-void PoseExtrapolator::AddPose(const common::Time time,
+void PoseExtrapolator::AddPose(const common::Time time,  //logic:由local_trajectory_builder_2d.cc 335行调用
                                const transform::Rigid3d& pose) {
   // 如果imu_tracker_没有初始化就先进行初始化
   if (imu_tracker_ == nullptr) {
@@ -112,11 +112,11 @@ void PoseExtrapolator::AddPose(const common::Time time,
   // 用于根据里程计数据计算线速度时姿态的预测
   odometry_imu_tracker_ = absl::make_unique<ImuTracker>(*imu_tracker_);
   // 用于位姿预测时的姿态预测
-  extrapolation_imu_tracker_ = absl::make_unique<ImuTracker>(*imu_tracker_);
+  extrapolation_imu_tracker_ = absl::make_unique<ImuTracker>(*imu_tracker_); //jc:调用拷贝构造函数重新建一个ImuTracker
 }
 
 // 向imu数据队列中添加imu数据,并进行数据队列的修剪
-void PoseExtrapolator::AddImuData(const sensor::ImuData& imu_data) {  //jc:在localTrajectoryBuilder414行调用
+void PoseExtrapolator::AddImuData(const sensor::ImuData& imu_data) {  //jc:在local_Trajectory_Builder_2d.cc414行调用
   CHECK(timed_pose_queue_.empty() ||
         imu_data.time >= timed_pose_queue_.back().time);
   imu_data_.push_back(imu_data);
@@ -237,7 +237,7 @@ void PoseExtrapolator::UpdateVelocitiesFromPoses() {
 }
 
 // 修剪imu的数据队列,丢掉过时的imu数据
-void PoseExtrapolator::TrimImuData() {
+void PoseExtrapolator::TrimImuData() {   //logic:由本文件119行调用
   // 保持imu队列中第二个数据的时间要大于最后一个位姿的时间, imu_date_最少是1个
   while (imu_data_.size() > 1 && !timed_pose_queue_.empty() &&
          imu_data_[1].time <= timed_pose_queue_.back().time) {
@@ -272,13 +272,13 @@ void PoseExtrapolator::AdvanceImuTracker(const common::Time time,
     // 在time之前没有IMU数据, 因此我们推进ImuTracker, 并使用姿势和假重力产生的角速度来帮助2D稳定
     
     // 预测当前时刻的姿态与重力方向
-    imu_tracker->Advance(time);
+    imu_tracker->Advance(time);  
     // 使用 假的重力数据对加速度的测量进行更新
     imu_tracker->AddImuLinearAccelerationObservation(Eigen::Vector3d::UnitZ());
     // 只能依靠其他方式得到的角速度进行测量值的更新
     imu_tracker->AddImuAngularVelocityObservation(
         odometry_data_.size() < 2 ? angular_velocity_from_poses_
-                                  : angular_velocity_from_odometry_);
+                                  : angular_velocity_from_odometry_); //jc:用于不使用imu时的角速度的更新
     return;
   }
 

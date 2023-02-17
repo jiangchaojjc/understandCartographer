@@ -39,8 +39,8 @@ std::unique_ptr<::cartographer::io::SubmapTextures> FetchSubmapTextures(
   srv.request.trajectory_id = submap_id.trajectory_id;
   srv.request.submap_index = submap_id.submap_index;
   
-  // Step: 1 调用SubmapQuery服务
-  if (!client->call(srv) ||
+  // Step: 1 调用SubmapQuery服务            //jc:client获取服务会调用node.cc240行HandleSubmapQuery
+  if (!client->call(srv) ||                 //jc:这个!client->call(srv)调用的时候会调用probability_grid.cc下的DrawToSubmapTexture137行
       srv.response.status.code != ::cartographer_ros_msgs::StatusCode::OK) {
     return nullptr;
   }

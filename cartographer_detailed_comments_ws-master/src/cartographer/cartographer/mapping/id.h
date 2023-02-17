@@ -150,7 +150,7 @@ class MapById {
 
  public:
   struct IdDataReference {
-    IdType id;
+    IdType id;                                                               //jc:IdType传的值为NodeId或者SubmapId，都在本文件找到
     const DataType& data;
   };
 
@@ -459,9 +459,9 @@ class MapById {
  private:
  
   struct MapByIndex {
-    bool can_append_ = true;
+    bool can_append_ = true;      //jc:是否能添加的标志
     // 这里的int指的是 NodeId或者SubmapId的index, DataType为实际存储的数据
-    std::map<int, DataType> data_;
+    std::map<int, DataType> data_;   //jc:int为不同子图或者节点的id，DataType为数据NodeSpec2D或者SubmapSpec2D
   };
 
   // c++11: static 修饰 成员函数, 代表静态成员函数
@@ -472,7 +472,7 @@ class MapById {
   static int GetIndex(const SubmapId& id) { return id.submap_index; }
 
   // 所有的轨迹, 以及轨迹内的数据
-  std::map<int, MapByIndex> trajectories_;
+  std::map<int, MapByIndex> trajectories_;    //jc:int为轨迹的id
 };
 
 }  // namespace mapping

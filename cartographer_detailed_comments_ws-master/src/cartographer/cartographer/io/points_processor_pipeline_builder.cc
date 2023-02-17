@@ -72,12 +72,12 @@ void RegisterFileWritingPointsProcessorWithTrajectories(
       [&trajectories, file_writer_factory](
           common::LuaParameterDictionary* const dictionary,
           PointsProcessor* const next) -> std::unique_ptr<PointsProcessor> {
-        return PointsProcessorType::FromDictionary(
+        return PointsProcessorType::FromDictionary(   //logic:如果是画贝汉名栅格图调用probability_grid_points_processor.cc104 行
             trajectories, file_writer_factory, dictionary, next);
       });
 }
 
-void RegisterBuiltInPointsProcessors(
+void RegisterBuiltInPointsProcessors(   //logic:由assets_write.cc的64行调用
     const std::vector<mapping::proto::Trajectory>& trajectories,
     const FileWriterFactory& file_writer_factory,
     PointsProcessorPipelineBuilder* builder) {
@@ -99,7 +99,7 @@ void RegisterBuiltInPointsProcessors(
       file_writer_factory, builder);
   RegisterFileWritingPointsProcessorWithTrajectories<XRayPointsProcessor>(
       trajectories, file_writer_factory, builder);
-  RegisterFileWritingPointsProcessorWithTrajectories<
+  RegisterFileWritingPointsProcessorWithTrajectories<    //logic:调用本文件66 行的回调函数
       ProbabilityGridPointsProcessor>(trajectories, file_writer_factory,
                                       builder);
 }

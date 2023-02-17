@@ -161,7 +161,7 @@ LuaParameterDictionary::NonReferenceCounted(
  * @param[in] code 配置文件内容
  * @param[in] file_resolver FileResolver类
  */
-LuaParameterDictionary::LuaParameterDictionary(
+LuaParameterDictionary::LuaParameterDictionary(  //jc:调用本文件177行
     const std::string& code, std::unique_ptr<FileResolver> file_resolver)
     : LuaParameterDictionary(code, ReferenceCount::YES,
                              std::move(file_resolver)) {}
@@ -188,7 +188,7 @@ LuaParameterDictionary::LuaParameterDictionary(
 
   lua_register(L_, "choose", LuaChoose);
   // 将LuaInclude注册为Lua的全局函数变量,使得Lua可以调用C函数
-  lua_register(L_, "include", LuaInclude);
+  lua_register(L_, "include", LuaInclude);  //jc:这里调用lua文件包含的所有include的lua文件
   lua_register(L_, "read", LuaRead);
 
   // luaL_loadstring()函数 将一个字符串code加载为 Lua 代码块
@@ -447,14 +447,14 @@ int LuaParameterDictionary::GetNonNegativeInt(const std::string& key) {
 // Lua function to run a script in the current Lua context. Takes the filename
 // as its only argument.
 // 读取.lua文件中的所有 include 的文件
-int LuaParameterDictionary::LuaInclude(lua_State* L) {
+int LuaParameterDictionary::LuaInclude(lua_State* L) { //jc:每次遇到include 字段都会调用这里
   CHECK_EQ(lua_gettop(L), 1);
   CHECK(lua_isstring(L, -1)) << "include takes a filename.";
 
   LuaParameterDictionary* parameter_dictionary = GetDictionaryFromRegistry(L);
-  const std::string basename = lua_tostring(L, -1);
+  const std::string basename = lua_tostring(L, -1); //jc:转换Include中内容为字符串
   const std::string filename =
-      parameter_dictionary->file_resolver_->GetFullPathOrDie(basename);
+      parameter_dictionary->file_resolver_->GetFullPathOrDie(basename); //jc:获取Include中的字符串所代表所代表的文件
   // 防止双重包含
   if (std::find(parameter_dictionary->included_files_.begin(),
                 parameter_dictionary->included_files_.end(),
@@ -474,7 +474,7 @@ int LuaParameterDictionary::LuaInclude(lua_State* L) {
 
   // 判断了2次文件是否存在
   const std::string content =
-      parameter_dictionary->file_resolver_->GetFileContentOrDie(basename);
+      parameter_dictionary->file_resolver_->GetFileContentOrDie(basename);  //jc:因为这里又检查了一次，，检查了两次，所以打印两次
   CheckForLuaErrors(
       L, luaL_loadbuffer(L, content.c_str(), content.size(), filename.c_str()));
   CheckForLuaErrors(L, lua_pcall(L, 0, LUA_MULTRET, 0));

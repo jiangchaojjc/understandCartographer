@@ -30,7 +30,7 @@ class ThreadPoolInterface;
 
 class Task {
  public:
-  friend class ThreadPoolInterface;
+  friend class ThreadPoolInterface; //jc:ThreadPoolInterface是task的友元类，ThreadPoolInterface可以访问task中的privatea的函数
 
   using WorkItem = std::function<void()>;
   enum State { NEW, DISPATCHED, DEPENDENCIES_COMPLETED, RUNNING, COMPLETED };
@@ -73,7 +73,8 @@ class Task {
   void OnDependenyCompleted();
 
   // 需要执行的任务
-  WorkItem work_item_ GUARDED_BY(mutex_);
+  WorkItem work_item_ GUARDED_BY(mutex_);  //jc:类似于函数指针
+  //jc:申明了一个线程池的指针
   ThreadPoolInterface* thread_pool_to_notify_ GUARDED_BY(mutex_) = nullptr;
   // 初始状态为NEW
   State state_ GUARDED_BY(mutex_) = NEW;

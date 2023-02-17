@@ -37,7 +37,7 @@ class MapBuilderContextInterface : public async_grpc::ExecutionContext {
     int trajectory_id;
     common::Time time;
     transform::Rigid3d local_pose;
-    std::shared_ptr<const sensor::RangeData> range_data;
+    std::shared_ptr<const sensor::RangeData>  range_data;
     std::unique_ptr<const mapping::TrajectoryBuilderInterface::InsertionResult>
         insertion_result;
   };

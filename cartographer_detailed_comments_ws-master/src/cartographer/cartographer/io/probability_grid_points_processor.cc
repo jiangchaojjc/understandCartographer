@@ -101,7 +101,7 @@ ProbabilityGridPointsProcessor::ProbabilityGridPointsProcessor(
 }
 
 std::unique_ptr<ProbabilityGridPointsProcessor>
-ProbabilityGridPointsProcessor::FromDictionary(
+ProbabilityGridPointsProcessor::FromDictionary(  //logic:由points_processor_pipeline_builder.cc 75行调用
     const std::vector<mapping::proto::Trajectory>& trajectories,
     const FileWriterFactory& file_writer_factory,
     common::LuaParameterDictionary* const dictionary,
@@ -126,7 +126,7 @@ ProbabilityGridPointsProcessor::FromDictionary(
 
 void ProbabilityGridPointsProcessor::Process(
     std::unique_ptr<PointsBatch> batch) {
-  range_data_inserter_.Insert(
+  range_data_inserter_.Insert(    
       {batch->origin, sensor::PointCloud(batch->points), {}},
       &probability_grid_);
   next_->Process(std::move(batch));

@@ -26,7 +26,7 @@
 namespace cartographer {
 namespace mapping {
 
-proto::LocalTrajectoryBuilderOptions2D CreateLocalTrajectoryBuilderOptions2D(
+proto::LocalTrajectoryBuilderOptions2D CreateLocalTrajectoryBuilderOptions2D( //logic:由trajectory_builder_insterface 59 行调用
     common::LuaParameterDictionary* const parameter_dictionary) {
   proto::LocalTrajectoryBuilderOptions2D options;
   options.set_min_range(parameter_dictionary->GetDouble("min_range"));
@@ -59,8 +59,8 @@ proto::LocalTrajectoryBuilderOptions2D CreateLocalTrajectoryBuilderOptions2D(
           parameter_dictionary->GetDictionary("ceres_scan_matcher").get());
   *options.mutable_motion_filter_options() = mapping::CreateMotionFilterOptions(
       parameter_dictionary->GetDictionary("motion_filter").get());
-  *options.mutable_pose_extrapolator_options() = CreatePoseExtrapolatorOptions( //jc:这里调用了位子推测器的函数
-      parameter_dictionary->GetDictionary("pose_extrapolator").get());
+  *options.mutable_pose_extrapolator_options() = CreatePoseExtrapolatorOptions( //jc:这里调用了位子推测器的函数pose_extrapolator_interface.cc 68行
+      parameter_dictionary->GetDictionary("pose_extrapolator").get());   //jc:pose_extrapolator这个字段根据lua文件中中括号前面的字段确定
   options.set_imu_gravity_time_constant(
       parameter_dictionary->GetDouble("imu_gravity_time_constant"));
   *options.mutable_submaps_options() = CreateSubmapsOptions2D(

@@ -35,7 +35,7 @@ constexpr uint16 kUpdateMarker = 1u << 15;
  * @param[in] upper_bound 0.9 上界
  * @return float 转换后的数值
  */
-float SlowValueToBoundedFloat(const uint16 value, 
+float SlowValueToBoundedFloat(const uint16 value,        //logic:本文件70行调用
                               const uint16 unknown_value,
                               const float unknown_result,
                               const float lower_bound,
@@ -55,7 +55,7 @@ float SlowValueToBoundedFloat(const uint16 value,
  * @param[in] upper_bound 0.9 
  * @return std::unique_ptr<std::vector<float>> 转换表的指针
  */
-std::unique_ptr<std::vector<float>> PrecomputeValueToBoundedFloat(
+std::unique_ptr<std::vector<float>> PrecomputeValueToBoundedFloat(  //logic:本文件98行调用
     const uint16 unknown_value, const float unknown_result,
     const float lower_bound, const float upper_bound) {
   auto result = absl::make_unique<std::vector<float>>();
@@ -68,7 +68,7 @@ std::unique_ptr<std::vector<float>> PrecomputeValueToBoundedFloat(
   // vector的个数为65536, 所以存的是2遍[0-32767]的映射
   for (size_t value = 0; value != num_values; ++value) {
     result->push_back(SlowValueToBoundedFloat(
-        static_cast<uint16>(value) & ~kUpdateMarker, // 取右边15位的数据, 0-32767
+        static_cast<uint16>(value) & ~kUpdateMarker, // 取右边15位的数据, 0-32767 //jc:本来是65536
         unknown_value,
         unknown_result, lower_bound, upper_bound));
   }
@@ -97,7 +97,7 @@ const std::vector<float>* ValueConversionTables::GetConversionTable(
     auto insertion_result = bounds_to_lookup_table_.emplace(
         bounds, PrecomputeValueToBoundedFloat(0, unknown_result, lower_bound,
                                               upper_bound));
-    return insertion_result.first->second.get();
+    return insertion_result.first->second.get();  //jc:返回新建的转换表的原始指针
   } 
   // 如果存在就直接返回原始指针
   else {

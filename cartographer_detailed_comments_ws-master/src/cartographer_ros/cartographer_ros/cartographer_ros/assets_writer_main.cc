@@ -54,7 +54,7 @@ int main(int argc, char** argv) {
   CHECK(!FLAGS_pose_graph_filename.empty())
       << "-pose_graph_filename is missing.";
 
-  ::cartographer_ros::AssetsWriter asset_writer(
+  ::cartographer_ros::AssetsWriter asset_writer(    //logic:调用assets_writer.cc139行
       FLAGS_pose_graph_filename,
       absl::StrSplit(FLAGS_bag_filenames, ',', absl::SkipEmpty()),
       FLAGS_output_file_prefix);

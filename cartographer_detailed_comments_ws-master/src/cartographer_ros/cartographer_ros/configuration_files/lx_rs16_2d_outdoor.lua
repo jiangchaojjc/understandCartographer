@@ -75,7 +75,7 @@ TRAJECTORY_BUILDER_2D.ceres_scan_matcher.rotation_weight = 1.
 --TRAJECTORY_BUILDER_2D.motion_filter.max_angle_radians = 0.004
 --TRAJECTORY_BUILDER_2D.imu_gravity_time_constant = 1.
 
-TRAJECTORY_BUILDER_2D.submaps.num_range_data = 80.
+TRAJECTORY_BUILDER_2D.submaps.num_range_data = 80.  //jc:一个子图里面由多少个节点。这个值设置小，就会生成更多的子图，内存占用多，值设置大，子图就会少
 TRAJECTORY_BUILDER_2D.submaps.grid_options_2d.resolution = 0.1
 
 POSE_GRAPH.optimize_every_n_nodes = 160.

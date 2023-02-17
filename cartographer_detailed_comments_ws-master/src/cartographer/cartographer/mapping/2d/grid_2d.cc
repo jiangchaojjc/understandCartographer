@@ -70,7 +70,7 @@ Grid2D::Grid2D(const MapLimits& limits, float min_correspondence_cost,
                ValueConversionTables* conversion_tables)
     : limits_(limits),
       correspondence_cost_cells_(
-          limits_.cell_limits().num_x_cells * limits_.cell_limits().num_y_cells,
+          limits_.cell_limits().num_x_cells * limits_.cell_limits().num_y_cells, //jc:初始化栅格 x*y 且都为0
           kUnknownCorrespondenceValue),  // 0
       min_correspondence_cost_(min_correspondence_cost),  // 0.1
       max_correspondence_cost_(max_correspondence_cost),  // 0.9
@@ -106,7 +106,7 @@ Grid2D::Grid2D(const proto::Grid2D& proto,
 
 // Finishes the update sequence.
 // 插入雷达数据结束
-void Grid2D::FinishUpdate() {
+void Grid2D::FinishUpdate() {   //
   while (!update_indices_.empty()) {
     DCHECK_GE(correspondence_cost_cells_[update_indices_.back()],
               kUpdateMarker);
@@ -122,7 +122,7 @@ void Grid2D::FinishUpdate() {
 void Grid2D::ComputeCroppedLimits(Eigen::Array2i* const offset,
                                   CellLimits* const limits) const {
   if (known_cells_box_.isEmpty()) {
-    *offset = Eigen::Array2i::Zero();
+    *offset = Eigen::Array2i::Zero();   //jc:offset为bouding_box最小的坐标，最接近于地图左上角，limits为bouding_box的size;bouding_box为像素坐标，
     *limits = CellLimits(1, 1);
     return;
   }
@@ -134,26 +134,26 @@ void Grid2D::ComputeCroppedLimits(Eigen::Array2i* const offset,
 // Grows the map as necessary to include 'point'. This changes the meaning of
 // these coordinates going forward. This method must be called immediately
 // after 'FinishUpdate', before any calls to 'ApplyLookupTable'.
-// 根据坐标决定是否对地图进行扩大
+// 根据坐标决定是否对地图进行扩大,这个方法在地图完成更新之后立即被调用，在ApplyLookupTable更新栅格值之前被调用
 void Grid2D::GrowLimits(const Eigen::Vector2f& point) {
-  GrowLimits(point, {mutable_correspondence_cost_cells()},
-             {kUnknownCorrespondenceValue});
+  GrowLimits(point, {mutable_correspondence_cost_cells()}, //jc:{mutable_correspondence_cost_cells()} 为1维的栅格地图，{kUnknownCorrespondenceValue} ={0}
+             {kUnknownCorrespondenceValue}); 
 }
 
 // 根据坐标决定是否对地图进行扩大
-void Grid2D::GrowLimits(const Eigen::Vector2f& point,
+void Grid2D::GrowLimits(const Eigen::Vector2f& point,          //logic:由 probability_grid_range_data_inserter_2d.cc 49行调用
                         const std::vector<std::vector<uint16>*>& grids,  //jc: 指向vector<uint16> 类型的指针 ，所以下面可以直接赋值
                         const std::vector<uint16>& grids_unknown_cell_values) {
   CHECK(update_indices_.empty());
   // 判断该点是否在地图坐标系内
-  while (!limits_.Contains(limits_.GetCellIndex(point))) {
+  while (!limits_.Contains(limits_.GetCellIndex(point))) {   //jc:如果这帧的栅格数据在当前的地图之外了就对地图进行扩大
     const int x_offset = limits_.cell_limits().num_x_cells / 2;
     const int y_offset = limits_.cell_limits().num_y_cells / 2;
     // 将xy扩大至2倍, 中心点不变, 向四周扩大
-    const MapLimits new_limits(
+    const MapLimits new_limits(   
         limits_.resolution(),
         limits_.max() +
-            limits_.resolution() * Eigen::Vector2d(y_offset, x_offset),
+            limits_.resolution() * Eigen::Vector2d(y_offset, x_offset), //jc:y_offset ,x_offset为像素大小，生成的是物理坐标的地图
         CellLimits(2 * limits_.cell_limits().num_x_cells,
                    2 * limits_.cell_limits().num_y_cells));
     const int stride = new_limits.cell_limits().num_x_cells;
@@ -165,7 +165,7 @@ void Grid2D::GrowLimits(const Eigen::Vector2f& point,
     // grids.size()为1
     for (size_t grid_index = 0; grid_index < grids.size(); ++grid_index) {
       std::vector<uint16> new_cells(new_size,
-                                    grids_unknown_cell_values[grid_index]);
+                                    grids_unknown_cell_values[grid_index]); //jc:grids_unknown_cell_values 为都是0的集合
       // 将老地图的栅格值复制到新地图上
       for (int i = 0; i < limits_.cell_limits().num_y_cells; ++i) {
         for (int j = 0; j < limits_.cell_limits().num_x_cells; ++j) {

@@ -55,7 +55,7 @@ class ProbabilityGridPointsProcessor : public PointsProcessor {
   ProbabilityGridPointsProcessor& operator=(
       const ProbabilityGridPointsProcessor&) = delete;
 
-  static std::unique_ptr<ProbabilityGridPointsProcessor> FromDictionary(
+  static std::unique_ptr<ProbabilityGridPointsProcessor> FromDictionary(  //logic:
       const std::vector<mapping::proto::Trajectory>& trajectories,
       const FileWriterFactory& file_writer_factory,
       common::LuaParameterDictionary* dictionary, PointsProcessor* next);

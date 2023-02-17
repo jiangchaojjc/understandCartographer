@@ -46,16 +46,16 @@ inline uint16 BoundedFloatToValue(const float float_value,
 }  // namespace
 
 // 通过概率计算Odd值 论文里的 odds(p)函数
-inline float Odds(float probability) {
+inline float Odds(float probability) {   //jc:将probability转换到odd
   return probability / (1.f - probability);
 }
 
 // 通过Odd值计算概率值 论文里的 odds^-1 函数
-inline float ProbabilityFromOdds(const float odds) {
+inline float ProbabilityFromOdds(const float odds) { // //jc:将odd转换到probability
   return odds / (odds + 1.f);
 }
 
-// probability与CorrespondenceCost的关系, CorrespondenceCost代表free的概率
+// probability与CorrespondenceCost的关系, CorrespondenceCost代表free的概率  //jc:probability代表占用的概率，CorrespondenceCost代表free的概率
 inline float ProbabilityToCorrespondenceCost(const float probability) {
   return 1.f - probability;
 }
@@ -102,8 +102,8 @@ inline uint16 ProbabilityToValue(const float probability) {
 
 
 // c++11: extern c风格
-extern const std::vector<float>* const kValueToProbability;   //jc:extern说明这个值是从其他文件中获取来的
-extern const std::vector<float>* const kValueToCorrespondenceCost;
+extern const std::vector<float>* const kValueToProbability;   //jc:extern说明这个值是从其他文件中获取来的，栅格占用概率
+extern const std::vector<float>* const kValueToCorrespondenceCost; //jc:栅格是空闲的概率 在probability_value.cc80行进行初始化  ，这里.cc初始化，.h通过extern申明再调用
 
 // Converts a uint16 (which may or may not have the update marker set) to a
 // probability in the range [kMinProbability, kMaxProbability].

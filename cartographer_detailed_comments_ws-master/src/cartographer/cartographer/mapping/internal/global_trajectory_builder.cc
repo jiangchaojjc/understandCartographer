@@ -70,7 +70,7 @@ class GlobalTrajectoryBuilder : public mapping::TrajectoryBuilderInterface {
    * @param[in] sensor_id topic名字
    * @param[in] timed_point_cloud_data 点云数据
    */
-  void AddSensorData(
+  void AddSensorData(           //logic: sensor_bridge.cc 296行 HandleRangefinder调用
       const std::string& sensor_id,
       const sensor::TimedPointCloudData& timed_point_cloud_data) override {
     CHECK(local_trajectory_builder_)
@@ -78,7 +78,7 @@ class GlobalTrajectoryBuilder : public mapping::TrajectoryBuilderInterface {
 
     // 进行扫描匹配, 返回匹配后的结果
     std::unique_ptr<typename LocalTrajectoryBuilder::MatchingResult>
-        matching_result = local_trajectory_builder_->AddRangeData(
+        matching_result = local_trajectory_builder_->AddRangeData(  //logic:调用local_trajectory_builder_2d.cc 140行
             sensor_id, timed_point_cloud_data);
 
     if (matching_result == nullptr) {
@@ -94,8 +94,8 @@ class GlobalTrajectoryBuilder : public mapping::TrajectoryBuilderInterface {
       kLocalSlamInsertionResults->Increment();
 
       // 将匹配后的结果 当做节点 加入到位姿图中
-      auto node_id = pose_graph_->AddNode(
-          matching_result->insertion_result->constant_data, trajectory_id_,
+      auto node_id = pose_graph_->AddNode( //logic:调用pose_graph_2d.cc 226行addNode 进行后端优化
+          matching_result->insertion_result->constant_data, trajectory_id_,//jc:insertion_result在local_trajectroy_builder_2d.h里48行定义
           matching_result->insertion_result->insertion_submaps);
           
       CHECK_EQ(node_id.trajectory_id, trajectory_id_);
@@ -120,12 +120,12 @@ class GlobalTrajectoryBuilder : public mapping::TrajectoryBuilderInterface {
   }
 
   // imu数据的处理, 数据走向有两个,一个是进入前端local_trajectory_builder_,一个是进入后端pose_graph_
-  void AddSensorData(const std::string& sensor_id,
+  void AddSensorData(const std::string& sensor_id, 
                      const sensor::ImuData& imu_data) override {
     if (local_trajectory_builder_) {
-      local_trajectory_builder_->AddImuData(imu_data);
+      local_trajectory_builder_->AddImuData(imu_data); //logic:调用local_trajectory_builder_2d.cc 415行
     }
-    pose_graph_->AddImuData(trajectory_id_, imu_data);
+    pose_graph_->AddImuData(trajectory_id_, imu_data);  //jc:调用pose_graph_2d.cc304行
   }
 
   // 里程计数据的处理, 数据走向有两个,一个是进入前端local_trajectory_builder_, 一个是进入后端pose_graph_
@@ -185,7 +185,7 @@ class GlobalTrajectoryBuilder : public mapping::TrajectoryBuilderInterface {
 // 类模板不支持实参推演, 所以在类外指定模板参数的具体类型, 再进行类的实例化
 
 // 2d的完整的slam
-std::unique_ptr<TrajectoryBuilderInterface> CreateGlobalTrajectoryBuilder2D(
+std::unique_ptr<TrajectoryBuilderInterface> CreateGlobalTrajectoryBuilder2D(   //logic:由map_builder.cc 206行调用
     std::unique_ptr<LocalTrajectoryBuilder2D> local_trajectory_builder,
     const int trajectory_id, mapping::PoseGraph2D* const pose_graph,
     const TrajectoryBuilderInterface::LocalSlamResultCallback&

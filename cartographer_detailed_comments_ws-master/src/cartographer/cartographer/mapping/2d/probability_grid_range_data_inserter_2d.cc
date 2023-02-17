@@ -33,14 +33,14 @@ namespace {
 constexpr int kSubpixelScale = 1000;
 
 // 根据点云的bounding box, 看是否需要对地图进行扩张
-void GrowAsNeeded(const sensor::RangeData& range_data,
+void GrowAsNeeded(const sensor::RangeData& range_data,      //logic:由本文件69行调用
                   ProbabilityGrid* const probability_grid) {
   // 找到点云的bounding_box
-  Eigen::AlignedBox2f bounding_box(range_data.origin.head<2>());
+  Eigen::AlignedBox2f bounding_box(range_data.origin.head<2>()); //jc:range_data.origin 为地图原点坐标
   // Padding around bounding box to avoid numerical issues at cell boundaries.
   constexpr float kPadding = 1e-6f;
-  for (const sensor::RangefinderPoint& hit : range_data.returns) {
-    bounding_box.extend(hit.position.head<2>());
+  for (const sensor::RangefinderPoint& hit : range_data.returns) {  //jc:对雷达的returns进行遍历，range_data.returns为所有hit的坐标点，range_data为世界坐标
+    bounding_box.extend(hit.position.head<2>());  //jc:根据所有hit点坐标扩展bounding box
   }
   for (const sensor::RangefinderPoint& miss : range_data.misses) {
     bounding_box.extend(miss.position.head<2>());
@@ -55,24 +55,24 @@ void GrowAsNeeded(const sensor::RangeData& range_data,
 /**
  * @brief 根据雷达点对栅格地图进行更新
  * 
- * @param[in] range_data 
+ * @param[in] range_data //jc:点云数据
  * @param[in] hit_table 更新占用栅格时的查找表
  * @param[in] miss_table 更新空闲栅格时的查找表
  * @param[in] insert_free_space 
  * @param[in] probability_grid 栅格地图
  */
-void CastRays(const sensor::RangeData& range_data,
+void CastRays(const sensor::RangeData& range_data,  //logic:由本文件的 152行调用
               const std::vector<uint16>& hit_table,
               const std::vector<uint16>& miss_table,
               const bool insert_free_space, ProbabilityGrid* probability_grid) {
   // 根据雷达数据调整地图范围
-  GrowAsNeeded(range_data, probability_grid);
+  GrowAsNeeded(range_data, probability_grid); //logic:调用本文件36行
 
   const MapLimits& limits = probability_grid->limits();
-  const double superscaled_resolution = limits.resolution() / kSubpixelScale;
+  const double superscaled_resolution = limits.resolution() / kSubpixelScale;  //jc:新的地图的分辨率为原来的1/1000，为了画线更细致
   const MapLimits superscaled_limits(
       superscaled_resolution, limits.max(),
-      CellLimits(limits.cell_limits().num_x_cells * kSubpixelScale,
+      CellLimits(limits.cell_limits().num_x_cells * kSubpixelScale, //jc:新的地图的大小为原来地图的1000倍
                  limits.cell_limits().num_y_cells * kSubpixelScale));
   // 雷达原点在地图中的像素坐标, 作为画线的起始坐标
   const Eigen::Array2i begin =
@@ -84,7 +84,7 @@ void CastRays(const sensor::RangeData& range_data,
     // 计算hit点在地图中的像素坐标, 作为画线的终止点坐标
     ends.push_back(superscaled_limits.GetCellIndex(hit.position.head<2>()));
     // 更新hit点的栅格值
-    probability_grid->ApplyLookupTable(ends.back() / kSubpixelScale, hit_table);
+    probability_grid->ApplyLookupTable(ends.back() / kSubpixelScale, hit_table); //logic:调用probability_grid.cc 73行
   }
   
   // 如果不插入free空间就可以结束了
@@ -93,23 +93,23 @@ void CastRays(const sensor::RangeData& range_data,
   }
 
   // Now add the misses.
-  for (const Eigen::Array2i& end : ends) {
+  for (const Eigen::Array2i& end : ends) {  //jc:从激光雷达位置到激光点之间的栅格（free），上面只更新了激光点的栅格
     std::vector<Eigen::Array2i> ray =
-        RayToPixelMask(begin, end, kSubpixelScale);
+        RayToPixelMask(begin, end, kSubpixelScale);  //jc:获取从begin到end之间的所有的坐标存到ray，通过贝汉名算法获取具体栅格坐标
     for (const Eigen::Array2i& cell_index : ray) {
       // 从起点到end点之前, 更新miss点的栅格值
-      probability_grid->ApplyLookupTable(cell_index, miss_table);
+      probability_grid->ApplyLookupTable(cell_index, miss_table); //logic:调用probability_grid.cc 73行
     }
   }
 
   // Finally, compute and add empty rays based on misses in the range data.
-  for (const sensor::RangefinderPoint& missing_echo : range_data.misses) {
-    std::vector<Eigen::Array2i> ray = RayToPixelMask(
+  for (const sensor::RangefinderPoint& missing_echo : range_data.misses) {   //jc:misses点为超过最大阈值的点
+    std::vector<Eigen::Array2i> ray = RayToPixelMask(   //jc:调用贝汉名算法画出栅格图
         begin, superscaled_limits.GetCellIndex(missing_echo.position.head<2>()),
         kSubpixelScale);
     for (const Eigen::Array2i& cell_index : ray) {
       // 从起点到misses点之前, 更新miss点的栅格值
-      probability_grid->ApplyLookupTable(cell_index, miss_table);
+      probability_grid->ApplyLookupTable(cell_index, miss_table);//logic:调用probability_grid.cc 73行
     }
   }
 }
@@ -133,7 +133,7 @@ CreateProbabilityGridRangeDataInserterOptions2D(
 }
 
 // 写入器的构造, 新建了2个查找表
-ProbabilityGridRangeDataInserter2D::ProbabilityGridRangeDataInserter2D(
+ProbabilityGridRangeDataInserter2D::ProbabilityGridRangeDataInserter2D(  //logic:由submap_2d.cc 215行调用
     const proto::ProbabilityGridRangeDataInserterOptions2D& options)
     : options_(options),
       // 生成更新占用栅格时的查找表 // param: hit_probability
@@ -149,7 +149,7 @@ ProbabilityGridRangeDataInserter2D::ProbabilityGridRangeDataInserter2D(
  * @param[in] range_data 要写入地图的点云
  * @param[in] grid 栅格地图
  */
-void ProbabilityGridRangeDataInserter2D::Insert(
+void ProbabilityGridRangeDataInserter2D::Insert(  //logic:  由submap_2d.cc 164行调用
     const sensor::RangeData& range_data, GridInterface* const grid) const {
   ProbabilityGrid* const probability_grid = static_cast<ProbabilityGrid*>(grid);
   CHECK(probability_grid != nullptr);

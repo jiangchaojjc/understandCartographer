@@ -103,7 +103,7 @@ class ActiveSubmaps2D {
   void AddSubmap(const Eigen::Vector2f& origin);
 
   const proto::SubmapsOptions2D options_;
-  std::vector<std::shared_ptr<Submap2D>> submaps_;
+  std::vector<std::shared_ptr<Submap2D>> submaps_;  //jc:前端和后端可以共享的指针，所以用shared_ptr
   std::unique_ptr<RangeDataInserterInterface> range_data_inserter_;
   
   // 转换表, 第[0-32767]位置, 存的是[0.9, 0.1~0.9]的数据

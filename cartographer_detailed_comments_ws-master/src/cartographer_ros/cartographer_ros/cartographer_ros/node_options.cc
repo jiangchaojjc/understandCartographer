@@ -72,7 +72,7 @@ NodeOptions CreateNodeOptions(
  * @param[in] configuration_basename 配置文件的名字
  * @return std::tuple<NodeOptions, TrajectoryOptions> 返回节点的配置与轨迹的配置
  */
-std::tuple<NodeOptions, TrajectoryOptions> LoadOptions(
+std::tuple<NodeOptions, TrajectoryOptions> LoadOptions(  //logic:由node_main.cc 71行调用
     const std::string& configuration_directory,
     const std::string& configuration_basename) {
   // 获取配置文件所在的目录
@@ -82,10 +82,10 @@ std::tuple<NodeOptions, TrajectoryOptions> LoadOptions(
         
   // 读取配置文件内容到code中
   const std::string code =
-      file_resolver->GetFileContentOrDie(configuration_basename);
+      file_resolver->GetFileContentOrDie(configuration_basename); //logic:调用configuration_file_resolver.cc 67行
 
   // 根据给定的字符串, 生成一个lua字典
-  cartographer::common::LuaParameterDictionary lua_parameter_dictionary(
+  cartographer::common::LuaParameterDictionary lua_parameter_dictionary( //jc:构造LuaParameterDictionary字典
       code, std::move(file_resolver));
 
   // 创建元组tuple,元组定义了一个有固定数目元素的容器, 其中的每个元素类型都可以不相同

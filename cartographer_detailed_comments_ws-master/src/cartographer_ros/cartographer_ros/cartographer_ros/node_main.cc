@@ -55,7 +55,7 @@ DEFINE_string(
 namespace cartographer_ros {
 namespace {
 
-void Run() {
+void Run() {   
   constexpr double kTfBufferCacheTimeInSeconds = 10.;
   tf2_ros::Buffer tf_buffer{::ros::Duration(kTfBufferCacheTimeInSeconds)};
   // 开启监听tf的独立线程
@@ -68,8 +68,8 @@ void Run() {
 
   // 根据Lua配置文件中的内容, 为node_options, trajectory_options 赋值
   std::tie(node_options, trajectory_options) =
-      LoadOptions(FLAGS_configuration_directory, FLAGS_configuration_basename);
-
+      LoadOptions(FLAGS_configuration_directory, FLAGS_configuration_basename); //jc:这两个参数是在launch 文件中传进来的，比如configuration_basename当参数被定义后
+                                                                      //jc:通过FLAGS_name就可访问到对应的参数
   // MapBuilder类是完整的SLAM算法类
   // 包含前端(TrajectoryBuilders,scan to submap) 与 后端(用于查找回环的PoseGraph) 
   auto map_builder =
@@ -113,7 +113,7 @@ void Run() {
 }  // namespace
 }  // namespace cartographer_ros
 
-int main(int argc, char** argv) {
+int main(int argc, char** argv) {   //jc:程序从这里开始处理
 
   // note: 初始化glog库
   google::InitGoogleLogging(argv[0]);

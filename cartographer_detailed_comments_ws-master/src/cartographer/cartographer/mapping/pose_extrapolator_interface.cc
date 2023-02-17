@@ -65,7 +65,7 @@ proto::ImuBasedPoseExtrapolatorOptions CreateImuBasedPoseExtrapolatorOptions(
 
 }  // namespace
 
-proto::PoseExtrapolatorOptions CreatePoseExtrapolatorOptions(
+proto::PoseExtrapolatorOptions CreatePoseExtrapolatorOptions( //jc:专门用来保存位子推测其所需的数据结构，由local_trajectory_builder_options_2d.cc 62行调用
     common::LuaParameterDictionary* const parameter_dictionary) {
   proto::PoseExtrapolatorOptions options;
   options.set_use_imu_based(parameter_dictionary->GetBool("use_imu_based"));

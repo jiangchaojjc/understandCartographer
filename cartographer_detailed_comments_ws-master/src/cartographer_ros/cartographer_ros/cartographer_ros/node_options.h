@@ -31,7 +31,7 @@ namespace cartographer_ros {
 struct NodeOptions {
   ::cartographer::mapping::proto::MapBuilderOptions map_builder_options;
   std::string map_frame;
-  double lookup_transform_timeout_sec;
+  double lookup_transform_timeout_sec;   //jc:这些参数都是根据revo_lds.lua文件中定义的字段定义。由node_option.cc93行调用，由node_option.cc 33行的函数读取
   double submap_publish_period_sec;
   double pose_publish_period_sec;
   double trajectory_publish_period_sec;

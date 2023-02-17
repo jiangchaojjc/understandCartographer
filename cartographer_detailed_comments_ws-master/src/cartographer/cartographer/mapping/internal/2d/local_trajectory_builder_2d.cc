@@ -41,11 +41,11 @@ static auto* kScanMatcherResidualAngleMetric = metrics::Histogram::Null();
  * @param[in] options 
  * @param[in] expected_range_sensor_ids 所有range类型的话题
  */
-LocalTrajectoryBuilder2D::LocalTrajectoryBuilder2D(
+LocalTrajectoryBuilder2D::LocalTrajectoryBuilder2D(  //logic:由map_builder.cc 194行调用
     const proto::LocalTrajectoryBuilderOptions2D& options,
     const std::vector<std::string>& expected_range_sensor_ids)
     : options_(options),
-      active_submaps_(options.submaps_options()),
+      active_submaps_(options.submaps_options()),   //logic:调用submap_2d.cc181行 栅格地图
       motion_filter_(options_.motion_filter_options()),
       real_time_correlative_scan_matcher_(
           options_.real_time_correlative_scan_matcher_options()),
@@ -85,10 +85,10 @@ LocalTrajectoryBuilder2D::TransformToGravityAlignedFrameAndFilter(
  * @param[in] filtered_gravity_aligned_point_cloud 匹配用的点云
  * @return std::unique_ptr<transform::Rigid2d> 匹配后的二维位姿
  */
-std::unique_ptr<transform::Rigid2d> LocalTrajectoryBuilder2D::ScanMatch(
+std::unique_ptr<transform::Rigid2d> LocalTrajectoryBuilder2D::ScanMatch( //logic:由本文件324行调用
     const common::Time time, const transform::Rigid2d& pose_prediction,
     const sensor::PointCloud& filtered_gravity_aligned_point_cloud) {
-  if (active_submaps_.submaps().empty()) {   //jc:如果栅格地图为空，会返回先验位姿pose_prediction pose_prediction时通过位姿推测器309行
+  if (active_submaps_.submaps().empty()) {   //jc:如果栅格地图为空，会返回先验位姿pose_prediction pose_prediction是通过位姿推测器309行产生
     return absl::make_unique<transform::Rigid2d>(pose_prediction);
   }
   // 使用active_submaps_的第一个子图进行匹配
@@ -99,11 +99,11 @@ std::unique_ptr<transform::Rigid2d> LocalTrajectoryBuilder2D::ScanMatch(
   transform::Rigid2d initial_ceres_pose = pose_prediction;
 
   // 根据参数决定是否 使用correlative_scan_matching对先验位姿进行校准
-  if (options_.use_online_correlative_scan_matching()) {
-    const double score = real_time_correlative_scan_matcher_.Match(
+  if (options_.use_online_correlative_scan_matching()) {  //jc:trajectory_builder_2d.lua 42行的use_online_correlative_scan_matching ，这一块给初始位姿做了矫正（暴力搜索）
+    const double score = real_time_correlative_scan_matcher_.Match(  //jc:扫描匹配开始。基于暴力搜索,调用real_time_correlative_scan_match_2d.cc 137 行
         pose_prediction, filtered_gravity_aligned_point_cloud,
         *matching_submap->grid(), &initial_ceres_pose);
-    kRealTimeCorrelativeScanMatcherScoreMetric->Observe(score);
+    kRealTimeCorrelativeScanMatcherScoreMetric->Observe(score); //jc:initial_ceres_pose矫正之后的位姿
   }
 
   auto pose_observation = absl::make_unique<transform::Rigid2d>();
@@ -137,13 +137,13 @@ std::unique_ptr<transform::Rigid2d> LocalTrajectoryBuilder2D::ScanMatch(
  * @return std::unique_ptr<LocalTrajectoryBuilder2D::MatchingResult> 匹配后的结果
  */
 std::unique_ptr<LocalTrajectoryBuilder2D::MatchingResult>
-LocalTrajectoryBuilder2D::AddRangeData(
+LocalTrajectoryBuilder2D::AddRangeData(      //jc:global_trajectroy_builder.cc 中的81行调用
     const std::string& sensor_id,
     const sensor::TimedPointCloudData& unsynchronized_data) {
   
   // Step: 1 进行多个雷达点云数据的时间同步, 点云的坐标是相对于tracking_frame的
   auto synchronized_data =
-      range_data_collator_.AddRangeData(sensor_id, unsynchronized_data);
+      range_data_collator_.AddRangeData(sensor_id, unsynchronized_data);  
   if (synchronized_data.ranges.empty()) {
     LOG(INFO) << "Range data collator filling buffer.";
     return nullptr;
@@ -268,7 +268,7 @@ LocalTrajectoryBuilder2D::AddRangeData(
     // 以最后一个点的时间戳估计出的坐标为这帧数据的原点
     accumulated_range_data_.origin = range_data_poses.back().translation();
     
-    return AddAccumulatedRangeData(
+    return AddAccumulatedRangeData(  //jc:调用本文件294行 包含了扫描匹配
         time,
         // 将点云变换到local原点处, 且姿态为0 
         //jc: inverse() 中的rotation_为机器人的姿态， gravity_alignment乘上之后才会得到inverse中姿态逆，再将range_data_poses.back()的坐标乘以前面得到的姿态逆
@@ -291,7 +291,7 @@ LocalTrajectoryBuilder2D::AddRangeData(
  * @return std::unique_ptr<LocalTrajectoryBuilder2D::MatchingResult> 
  */
 std::unique_ptr<LocalTrajectoryBuilder2D::MatchingResult>
-LocalTrajectoryBuilder2D::AddAccumulatedRangeData(   //logic:本类 140行 AddRangeData调用
+LocalTrajectoryBuilder2D::AddAccumulatedRangeData(   //logic:本文件 271行 AddRangeData调用
     const common::Time time,
     const sensor::RangeData& gravity_aligned_range_data,
     const transform::Rigid3d& gravity_alignment,
@@ -305,10 +305,10 @@ LocalTrajectoryBuilder2D::AddAccumulatedRangeData(   //logic:本类 140行 AddRa
   // Computes a gravity aligned pose prediction.
   // 进行位姿的预测, 先验位姿
   const transform::Rigid3d non_gravity_aligned_pose_prediction =
-      extrapolator_->ExtrapolatePose(time);
+      extrapolator_->ExtrapolatePose(time);  //jc:位姿推测其估计time时刻的位姿
   // 将三维位姿先旋转到姿态为0, 再取xy坐标将三维位姿转成二维位姿
   const transform::Rigid2d pose_prediction = transform::Project2D(
-      non_gravity_aligned_pose_prediction * gravity_alignment.inverse());  //jc:初始时刻，如果imu有xy方向的线加速度分量，初始时刻也不是0，0，0
+      non_gravity_aligned_pose_prediction * gravity_alignment.inverse());  //jc:重力矫正，重力方向z轴一致，初始时刻，如果imu有xy方向的线加速度分量，初始时刻也不是0，0，0
 
   // Step: 7 对 returns点云 进行自适应体素滤波，返回的点云的数据类型是PointCloud
   const sensor::PointCloud& filtered_gravity_aligned_point_cloud =
@@ -321,7 +321,7 @@ LocalTrajectoryBuilder2D::AddAccumulatedRangeData(   //logic:本类 140行 AddRa
   // local map frame <- gravity-aligned frame
   // 扫描匹配, 进行点云与submap的匹配
   std::unique_ptr<transform::Rigid2d> pose_estimate_2d =
-      ScanMatch(time, pose_prediction, filtered_gravity_aligned_point_cloud);
+      ScanMatch(time, pose_prediction, filtered_gravity_aligned_point_cloud); //logic:调用本文件88行 ，通过pose_prediction和地图进行匹配
 
   if (pose_estimate_2d == nullptr) {
     LOG(WARNING) << "Scan matching failed.";
@@ -330,11 +330,12 @@ LocalTrajectoryBuilder2D::AddAccumulatedRangeData(   //logic:本类 140行 AddRa
 
   // 将二维坐标旋转回之前的姿态
   const transform::Rigid3d pose_estimate =
-      transform::Embed3D(*pose_estimate_2d) * gravity_alignment;
-  // 校准位姿估计器
+      transform::Embed3D(*pose_estimate_2d) * gravity_alignment;    //jc:pose_estimate_2d扫描匹配之后的位置，将pose_estimate_2d*gravity_alignment得到扫描匹配之后的姿态
+  // 校准位姿估计器。//jc:对姿态进行校准
   extrapolator_->AddPose(time, pose_estimate);
 
   // Step: 8 将 原点位于local坐标系原点处的点云 变换成 原点位于匹配后的位姿处的点云
+  //jc:这样地图的原点就会随着机器人的位姿而变化，以机器位姿为原点
   sensor::RangeData range_data_in_local =
       TransformRangeData(gravity_aligned_range_data,
                          transform::Embed3D(pose_estimate_2d->cast<float>()));
@@ -385,7 +386,7 @@ LocalTrajectoryBuilder2D::AddAccumulatedRangeData(   //logic:本类 140行 AddRa
  * @return std::unique_ptr<LocalTrajectoryBuilder2D::InsertionResult> 
  */
 std::unique_ptr<LocalTrajectoryBuilder2D::InsertionResult>
-LocalTrajectoryBuilder2D::InsertIntoSubmap(
+LocalTrajectoryBuilder2D::InsertIntoSubmap(   //logic:本文件343行AddAccumulatedRangeData调用，将点云写成栅格地图
     const common::Time time, const sensor::RangeData& range_data_in_local,
     const sensor::PointCloud& filtered_gravity_aligned_point_cloud,
     const transform::Rigid3d& pose_estimate,
@@ -396,7 +397,7 @@ LocalTrajectoryBuilder2D::InsertIntoSubmap(
   }
   // 将点云数据写入到submap中
   std::vector<std::shared_ptr<const Submap2D>> insertion_submaps =
-      active_submaps_.InsertRangeData(range_data_in_local);
+      active_submaps_.InsertRangeData(range_data_in_local);  //logic:调用submap_2d.cc191行
 
   // 生成InsertionResult格式的数据进行返回
   return absl::make_unique<InsertionResult>(InsertionResult{
@@ -412,7 +413,7 @@ LocalTrajectoryBuilder2D::InsertIntoSubmap(
 }
 
 // 将IMU数据加入到Extrapolator中
-void LocalTrajectoryBuilder2D::AddImuData(const sensor::ImuData& imu_data) {
+void LocalTrajectoryBuilder2D::AddImuData(const sensor::ImuData& imu_data) { //logic:由global_trajectory_builder.cc 123行
   CHECK(options_.use_imu_data()) << "An unexpected IMU packet was added.";
   InitializeExtrapolator(imu_data.time);
   extrapolator_->AddImuData(imu_data);
@@ -430,14 +431,14 @@ void LocalTrajectoryBuilder2D::AddOdometryData(
 }
 
 // 如果Extrapolator没有初始化就进行初始化
-void LocalTrajectoryBuilder2D::InitializeExtrapolator(const common::Time time) {
+void LocalTrajectoryBuilder2D::InitializeExtrapolator(const common::Time time) {   //jc:由本文件的AddRangeData函数156行调用
   // 如果已经初始化过了就直接返回
   if (extrapolator_ != nullptr) {
     return;
   }
 
   // 注意 use_imu_based为true就会报错
-  CHECK(!options_.pose_extrapolator_options().use_imu_based());
+  CHECK(!options_.pose_extrapolator_options().use_imu_based());  //jc:位姿推测器中的trajectory_builder_2d.lua 73行的参数
   // TODO(gaschler): Consider using InitializeWithImu as 3D does.
 
   // 初始化位姿推测器
@@ -448,7 +449,7 @@ void LocalTrajectoryBuilder2D::InitializeExtrapolator(const common::Time time) {
       options_.pose_extrapolator_options()
           .constant_velocity()
           .imu_gravity_time_constant()); // 10
-  // 添加初始位姿
+  // 添加初始位姿  //jc:调用pose_extrapolator.cc 79行
   extrapolator_->AddPose(time, transform::Rigid3d::Identity());  //jc:初始化位姿推测器，初始化时transform::Rigid3d::Identity() 传入0,0,0
 }
 
